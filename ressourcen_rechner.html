@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ressourcen-Rechner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .output {
+            margin-top: 30px;
+        }
+        .result {
+            font-size: 20px;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #eef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ressourcen-Rechner</h1>
+        
+        <label for="schwert">Schwertkämpfer</label>
+        <input type="number" id="schwert" min="0" value="0">
+        
+        <label for="bogen">Bogenschützen</label>
+        <input type="number" id="bogen" min="0" value="0">
+        
+        <label for="hoplit">Hopliten</label>
+        <input type="number" id="hoplit" min="0" value="0">
+        
+        <label for="reiter">Reiter</label>
+        <input type="number" id="reiter" min="0" value="0">
+        
+        <label for="streitwagen">Streitwagen</label>
+        <input type="number" id="streitwagen" min="0" value="0">
+        
+        <label for="schleuderer">Schleuderer</label>
+        <input type="number" id="schleuderer" min="0" value="0">
+        
+        <div class="output">
+            <div class="result">Stein: <span id="stein">0</span></div>
+            <div class="result">Holz: <span id="holz">0</span></div>
+            <div class="result">Silber: <span id="silber">0</span></div>
+            <div class="result">Rohstoffe: <span id="alle">0</span></div>
+            <div class="result">Zeit (bei Kaserne 5): <span id="zeit">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        //helper functions
+        function secondsToTime(totalSeconds) {
+            //let secs = totalSeconds % 86400;
+            let secs = totalSeconds;
+            if (secs < 0) secs += 86400;
+            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+            const s = (secs % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+        // Kosten pro Einheit (Stein, Holz, Silber, Zeit in Minuten)
+        const kosten = {
+            schwert:     { stein: 0,   holz: 95,  silber: 85,  zeit: 8*60+35 },
+            bogen:       { stein: 0,   holz: 120, silber: 75,  zeit: 9*60+04 },
+            hoplit:      { stein: 75,  holz: 0,   silber: 150, zeit: 10*60+58 },
+            reiter:      { stein: 120,   holz: 240, silber: 360, zeit: 34*60+21 },
+            streitwagen: { stein: 440, holz: 200, silber: 320, zeit: 45*60+48 },
+            schleuderer: { stein: 100,   holz: 55,  silber: 40,  zeit: 9*60+32 }
+        };
+
+        // Funktion zum Berechnen und Aktualisieren der Ausgaben
+        function berechneRessourcen() {
+            // Eingabewerte holen
+            const anzahlSchwert = parseInt(document.getElementById('schwert').value) || 0;
+            const anzahlBogen = parseInt(document.getElementById('bogen').value) || 0;
+            const anzahlHoplit = parseInt(document.getElementById('hoplit').value) || 0;
+            const anzahlReiter = parseInt(document.getElementById('reiter').value) || 0;
+            const anzahlStreitwagen = parseInt(document.getElementById('streitwagen').value) || 0;
+            const anzahlSchleuderer = parseInt(document.getElementById('schleuderer').value) || 0;
+
+            // Gesamtkosten berechnen
+            const totalStein = 
+                anzahlSchwert * kosten.schwert.stein +
+                anzahlBogen * kosten.bogen.stein +
+                anzahlHoplit * kosten.hoplit.stein +
+                anzahlReiter * kosten.reiter.stein +
+                anzahlStreitwagen * kosten.streitwagen.stein +
+                anzahlSchleuderer * kosten.schleuderer.stein;
+
+            const totalHolz = 
+                anzahlSchwert * kosten.schwert.holz +
+                anzahlBogen * kosten.bogen.holz +
+                anzahlHoplit * kosten.hoplit.holz +
+                anzahlReiter * kosten.reiter.holz +
+                anzahlStreitwagen * kosten.streitwagen.holz +
+                anzahlSchleuderer * kosten.schleuderer.holz;
+
+            const totalSilber = 
+                anzahlSchwert * kosten.schwert.silber +
+                anzahlBogen * kosten.bogen.silber +
+                anzahlHoplit * kosten.hoplit.silber +
+                anzahlReiter * kosten.reiter.silber +
+                anzahlStreitwagen * kosten.streitwagen.silber +
+                anzahlSchleuderer * kosten.schleuderer.silber;
+                
+            const totalRohstoffe = totalSilber + totalHolz + totalStein;
+
+            const totalZeit = 
+                anzahlSchwert * kosten.schwert.zeit +
+                anzahlBogen * kosten.bogen.zeit +
+                anzahlHoplit * kosten.hoplit.zeit +
+                anzahlReiter * kosten.reiter.zeit +
+                anzahlStreitwagen * kosten.streitwagen.zeit +
+                anzahlSchleuderer * kosten.schleuderer.zeit;
+
+            // Ausgabefelder aktualisieren
+            document.getElementById('stein').textContent = totalStein;
+            document.getElementById('holz').textContent = totalHolz;
+            document.getElementById('silber').textContent = totalSilber;
+            document.getElementById('zeit').textContent = secondsToTime(totalZeit);
+            document.getElementById('alle').textContent = totalRohstoffe;
+        }
+
+        // Event-Listener für alle Eingabefelder
+        document.getElementById('schwert').addEventListener('input', berechneRessourcen);
+        document.getElementById('bogen').addEventListener('input', berechneRessourcen);
+        document.getElementById('hoplit').addEventListener('input', berechneRessourcen);
+        document.getElementById('reiter').addEventListener('input', berechneRessourcen);
+        document.getElementById('streitwagen').addEventListener('input', berechneRessourcen);
+        document.getElementById('schleuderer').addEventListener('input', berechneRessourcen);
+
+        // Initial einmal berechnen
+        berechneRessourcen();
+    </script>
+</body>
+</html>

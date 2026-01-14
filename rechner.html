@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ancient Greek Battle Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: url('https://thumbs.dreamstime.com/b/glowing-dragon-eggs-nestled-deep-crystalstudded-cave-lair-spectacular-fantasy-illustration-game-art-immerse-yourself-371035060.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #f0e6d2;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            color: #ffd700;
+            text-shadow: 0 0 10px #b8860b;
+        }
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #b8860b;
+            box-shadow: 0 0 25px rgba(184, 134, 11, 0.8);
+        }
+        .header-decoration {
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .header-decoration img {
+            border-radius: 10px;
+            box-shadow: 0 0 15px #ffd700;
+            max-width: 220px;
+        }
+        .section {
+            background: rgba(20, 10, 30, 0.7);
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            border: 2px solid #daa520;
+        }
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+        input[type="number"] {
+            width: 120px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #ffd700;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        button {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            font-size: 1.6em;
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(#4b0000, #8b0000);
+            color: #ffd700;
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 20px #b8860b;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px #ffd700;
+        }
+        #results {
+            background: rgba(20, 10, 30, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #daa520;
+        }
+        p {
+            font-size: 1.2em;
+            margin: 12px 0;
+        }
+        .guardian {
+            position: absolute;
+            width: 180px;
+            opacity: 0.85;
+            filter: drop-shadow(0 0 10px #ffd700);
+        }
+        .left-guardian { left: -50px; top: 150px; transform: rotate(-15deg); }
+        .right-guardian { right: -50px; top: 150px; transform: rotate(15deg); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-decoration">
+            <img src="https://www.theoi.com/image/M24.1Ladon_sm.jpg" alt="Ladon, the Dragon Guardian">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Zeus_Typhon_Staatliche_Antikensammlungen_596.jpg" alt="Typhon, the Mighty Serpent">
+            <img src="https://paleothea.com/wp-content/uploads/images/ladon-guarding-golden-apples.jpeg" alt="Ladon Guarding the Golden Apples">
+        </div>
+        <h1>Battle Simulator</h1>
+        <p class="subtitle">Battle Simulator for Grepolis</p>
+
+        <img src="https://www.worldhistory.org/img/r/p/750x750/17715.jpg?v=1691488428-1691489327" alt="Typhon Guardian" class="guardian left-guardian">
+        <img src="https://images.ctfassets.net/m3d2dwoc9jko/2JuFk5qjr3fjtY5aEqvHPL/4f78b03485f130ac07bab2c0dcb35786/hercules-slaying-the-dragon-ladon-cornelis-cort-after-frans-floris-1563.jpg" alt="Hero vs Dragon" class="guardian right-guardian">
+
+        <div class="section">
+            <h2>Attacking Forces</h2>
+            <label>Reiter: <input type="number" id="att_reiter" min="0" value="0"></label>
+            <label>Hopliten: <input type="number" id="att_hopliten" min="0" value="0"></label>
+            <label>Streitwagen: <input type="number" id="att_streitwagen" min="0" value="0"></label>
+            <label>Schleuderer: <input type="number" id="att_schleuderer" min="0" value="0"></label>
+            <p>Schlag (total): <span id="total_att_schlag">0</span></p>
+            <p>Stich (total): <span id="total_att_stich">0</span></p>
+            <p>Fern (total): <span id="total_att_fern">0</span></p>
+        </div>
+
+        <div class="section">
+            <h2>Defending Forces</h2>
+            <label>Anzahl Schwertkaempfer: <input type="number" id="def_schwert" min="0" value="0"></label>
+            <label>Anzahl Hopliten: <input type="number" id="def_hopliten" min="0" value="0"></label>
+            <label>Anzahl Bogenschuetzen: <input type="number" id="def_bogen" min="0" value="0"></label>
+            <label>Anzahl Milizen: <input type="number" id="def_milizen" min="0" value="0"></label>
+            <label>Mauer: <input type="number" id="mauer" min="0" max="20" value="0"></label>
+            <p>Schlag (total): <span id="total_def_schlag">0</span></p> 
+	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_schlag">0</span></p>
+            <p>Stich (total): <span id="total_def_stich">0</span></p> 
+	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_stich">0</span></p>
+            <p>Fern (total): <span id="total_def_fern">0</span></p> 
+	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_fern">0</span></p>
+        </div>
+
+        <button onclick="calculateLosses()">Simulate</button>
+
+        <div id="results">
+            <h2>Attacker Losses</h2>
+            <p>Schleuderer: <span id="schleuderer_loss">0</span></p>
+            <p>Hopliten: <span id="off_hopliten_loss">0</span></p>
+            <p>Reiter: <span id="reiter_loss">0</span></p>
+            <h3>Costs</h3>
+            <p>Holz: <span id="holz_off_loss">0</span></p>
+            <p>Silber: <span id="silber_off_loss">0</span></p>
+            <p>Stein: <span id="stein_off_loss">0</span></p>
+            <p>Insgesamt: <span id="insgesamt_off_loss">0</span></p>
+            <p>Zeit: <span id="zeit_off_loss">0</span></p>
+            <h2>Defender Losses</h2>
+            <p>Schwertkaempfer: <span id="schwertkaempfer_loss">0</span></p>
+            <p>Bogenschuetzen: <span id="bogenschuetzen_loss">0</span></p>
+            <p>Hopliten: <span id="def_hopliten_loss">0</span></p>
+            <h3>Costs</h3>
+            <p>Holz: <span id="holz_def_loss">0</span></p>
+            <p>Silber: <span id="silber_def_loss">0</span></p>
+            <p>Stein: <span id="stein_def_loss">0</span></p>
+            <p>Insgesamt: <span id="insgesamt_def_loss">0</span></p>
+            <p>Zeit: <span id="zeit_def_loss">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        //helper functions
+        function secondsToTime(totalSeconds) {
+            let secs = totalSeconds; // % 86400;
+            if (secs < 0) secs += 86400;
+            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+            const s = (secs % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+        //end helper functions
+
+        // Zeit bei Kaserne 5
+        const units = {
+            reiter: { attack: { type: 'Schlag', value: 60 }, defense: { schlag: 18, stich: 1, fern: 24 },
+            cost: { holz:240, stein:120, silber:360, gunst:0, einheitenplaetze:3, time:34*60+21} },
+            
+            hopliten_att: { attack: { type: 'Stich', value: 16 }, defense: { schlag: 18, stich: 12, fern: 7 }, 
+            cost: { holz:0, stein:75, silber:150, gunst:0, einheitenplaetze:1, time:10*60+58} },
+            
+            streitwagen: { attack: { type: 'Stich', value: 56 }, defense: { schlag: 76, stich: 16, fern: 56 }, 
+            cost: { holz:200, stein:440, silber:320, gunst:0, einheitenplaetze:4, time:45*60+48} },
+            
+            schleuderer: { attack: { type: 'Fern', value: 23 }, defense: { schlag: 7, stich: 8, fern: 2 }, 
+            cost: { holz:55, stein:100, silber:40, gunst:0, einheitenplaetze:1, time:9*60+32} },
+            
+            schwert: { attack: { type: 'Schlag', value: 5 }, defense: { schlag: 14, stich: 8, fern: 30 }, 
+            cost: { holz:95, stein:0, silber:85, gunst:0, einheitenplaetze:1, time:8*60+35} },
+            
+            hopliten_def: { attack: { type: 'Stich', value: 16 }, defense: { schlag: 18, stich: 12, fern: 7 }, 
+            cost: { holz:0, stein:75, silber:150, gunst:0, einheitenplaetze:1, time:10*60+58} },
+            
+            bogen: { attack: { type: 'Fern', value: 8 }, defense: { schlag: 7, stich: 25, fern: 13 }, 
+            cost: { holz:120, stein:0, silber:75, gunst:0, einheitenplaetze:1, time:9*60+4} },
+
+            miliz: { attack: { type: 'Fern', value: 0 }, defense: { schlag: 6, stich: 8, fern: 4 }, 
+            cost: { holz:0, stein:0, silber:0, gunst:0, einheitenplaetze:0, time:0} }
+        };
+        let mauerdef = [0, 3.7, 7.5, 11.4, 15.5, 19.7, 24.1, 28.5, 33.3, 38.0, 43.0, 48.1, 53.5, 59.0, 64.7, 70.5, 76.7, 82.9, 89.5, 96.2, 103.3, 110.4,, 117.9, 125.6, 133.6, 141.9];
+        function calculateLosses() {
+            const attReiter = parseInt(document.getElementById('att_reiter').value) || 0;
+            const attHopliten = parseInt(document.getElementById('att_hopliten').value) || 0;
+            const attStreitwagen = parseInt(document.getElementById('att_streitwagen').value) || 0;
+            const attSchleuderer = parseInt(document.getElementById('att_schleuderer').value) || 0;
+            const defSchwert = parseInt(document.getElementById('def_schwert').value) || 0;
+            const defHopliten = parseInt(document.getElementById('def_hopliten').value) || 0;
+            const defBogen = parseInt(document.getElementById('def_bogen').value) || 0;
+            const defMiliz = parseInt(document.getElementById('def_milizen').value) || 0;
+            const mauer = parseInt(document.getElementById('mauer').value) || 0;
+
+            const mauer_factor = 1 + mauerdef[mauer]/100;
+
+            // how much cost one attacking point
+	    const ressourcen4stich4hoplit = (units.hopliten_att.cost.stein + units.hopliten_att.cost.holz + units.hopliten_att.cost.silber)/units.hopliten_att.attack.value;
+	    const ressourcen4stich4streitwagen = (units.streitwagen.cost.stein + units.streitwagen.cost.holz + units.streitwagen.cost.silber)/units.streitwagen.attack.value;
+	    const ressourcen4stich = Math.min(ressourcen4stich4hoplit, ressourcen4stich4streitwagen);
+	    const ressourcen4schlag = (units.reiter.cost.stein + units.reiter.cost.holz + units.reiter.cost.silber)/units.reiter.attack.value;
+	    const ressourcen4fern = (units.schleuderer.cost.stein + units.schleuderer.cost.holz + units.schleuderer.cost.silber)/units.schleuderer.attack.value;         
+
+            const attSchlag = attReiter * units.reiter.attack.value;
+            const attStich = attHopliten * units.hopliten_att.attack.value + attStreitwagen * units.streitwagen.attack.value;
+            const attFern = attSchleuderer * units.schleuderer.attack.value;
+            document.getElementById('total_att_schlag').textContent = attSchlag;
+            document.getElementById('total_att_stich').textContent = attStich;
+            document.getElementById('total_att_fern').textContent = attFern;
+
+            const defSchlag = (defSchwert * units.schwert.defense.schlag + defHopliten * units.hopliten_def.defense.schlag + defBogen * units.bogen.defense.schlag + defMiliz * units.miliz.defense.schlag)*mauer_factor;
+            const defStich = (defSchwert * units.schwert.defense.stich + defHopliten * units.hopliten_def.defense.stich + defBogen * units.bogen.defense.stich + defMiliz * units.miliz.defense.stich)*mauer_factor;
+            const defFern = (defSchwert * units.schwert.defense.fern + defHopliten * units.hopliten_def.defense.fern + defBogen * units.bogen.defense.fern  + defMiliz * units.miliz.defense.fern)*mauer_factor;
+            document.getElementById('total_def_schlag').textContent = defSchlag;
+            document.getElementById('total_def_stich').textContent = defStich;
+            document.getElementById('total_def_fern').textContent = defFern;
+
+            const totalAtt = attFern + attStich + attSchlag || 1;
+            const proportion_fern_off = attFern / totalAtt;
+            const proportion_stich_off = attStich / totalAtt;
+            const proportion_schlag_off = attSchlag / totalAtt;
+
+            benoetigteHopliten = Math.ceil(defStich/units.hopliten_att.attack.value);
+            benoetigteStreitwagen = Math.ceil(defStich/units.streitwagen.attack.value);
+            benoetigteReiter = Math.ceil(defSchlag/units.reiter.attack.value);
+            benoetigteSchleuderer = Math.ceil(defFern/units.schleuderer.attack.value);
+
+            let loss_def_schwert = 0;
+            let loss_def_bogen = 0;
+            let loss_def_hoplit = 0;
+            let loss_off_reiter = 0;
+            let loss_off_hopliten = 0;
+            let loss_off_streitwagen = 0;
+            let loss_off_schleuderer = 0;
+
+            if (attSchlag > 0) {
+                const rate_loss_off = Math.min((proportion_schlag_off * defSchlag + 10 + 10*mauer) / attSchlag, 1) ** 1.2;
+                const rate_loss_def = Math.min(attSchlag / (proportion_schlag_off * defSchlag + 10 + 10*mauer), 1) ** 1.2;
+                loss_def_schwert += Math.round(defSchwert * proportion_schlag_off * rate_loss_def);
+                loss_def_bogen += Math.round(defBogen * proportion_schlag_off * rate_loss_def);
+                loss_def_hoplit += Math.round(defHopliten * proportion_schlag_off * rate_loss_def);
+                loss_off_reiter = Math.round(attReiter * rate_loss_off);
+            }
+            if (attStich > 0) {
+                const rate_loss_off = Math.min((proportion_stich_off * defStich + 10 + 10*mauer) / attStich, 1) ** 1.2;
+                const rate_loss_def = Math.min(attStich / (proportion_stich_off * defStich + 10 + 10*mauer), 1) ** 1.2;
+                loss_def_schwert += Math.round(defSchwert * proportion_stich_off * rate_loss_def);
+                loss_def_bogen += Math.round(defBogen * proportion_stich_off * rate_loss_def);
+                loss_def_hoplit += Math.round(defHopliten * proportion_stich_off * rate_loss_def);
+                loss_off_hopliten = Math.round(attHopliten * rate_loss_off);
+                loss_off_streitwagen = Math.round(attStreitwagen * rate_loss_off);
+            }
+            if (attFern > 0) {
+                const rate_loss_off = Math.min((proportion_fern_off * defFern + 10 + 10*mauer) / attFern, 1) ** 1.2;
+                const rate_loss_def = Math.min(attFern / (proportion_fern_off * defFern + 10 + 10*mauer), 1) ** 1.2;
+                loss_def_schwert += Math.round(defSchwert * proportion_fern_off * rate_loss_def);
+                loss_def_bogen += Math.round(defBogen * proportion_fern_off * rate_loss_def);
+                loss_def_hoplit += Math.round(defHopliten * proportion_fern_off * rate_loss_def);
+                loss_off_schleuderer = Math.round(attSchleuderer * rate_loss_off);
+            }
+
+            document.getElementById('schwertkaempfer_loss').textContent = loss_def_schwert;
+            document.getElementById('def_hopliten_loss').textContent = loss_def_hoplit;
+            document.getElementById('bogenschuetzen_loss').textContent = loss_def_bogen;
+            document.getElementById('schleuderer_loss').textContent = loss_off_schleuderer;
+            document.getElementById('off_hopliten_loss').textContent = loss_off_hopliten;
+            document.getElementById('reiter_loss').textContent = loss_off_reiter;
+            
+            const def_loss_stein = loss_def_schwert * units.schwert.cost.stein + loss_def_hoplit * units.hopliten_def.cost.stein + loss_def_bogen * units.bogen.cost.stein;
+            const def_loss_holz = loss_def_schwert * units.schwert.cost.holz + loss_def_hoplit * units.hopliten_def.cost.holz + loss_def_bogen * units.bogen.cost.holz;
+            const def_loss_silber = loss_def_schwert * units.schwert.cost.silber + loss_def_hoplit * units.hopliten_def.cost.silber + loss_def_bogen * units.bogen.cost.silber;
+            const def_loss_total = def_loss_stein + def_loss_holz + def_loss_silber;
+            const def_loss_time = loss_def_schwert * units.schwert.cost.time + loss_def_hoplit * units.hopliten_def.cost.time + loss_def_bogen * units.bogen.cost.time;
+            
+            const off_loss_stein = loss_off_schleuderer * units.schleuderer.cost.stein + loss_off_hopliten * units.hopliten_def.cost.stein + loss_off_reiter * units.reiter.cost.stein;
+            const off_loss_holz = loss_off_schleuderer * units.schleuderer.cost.holz + loss_off_hopliten * units.hopliten_def.cost.holz + loss_off_reiter * units.reiter.cost.holz;
+            const off_loss_silber = loss_off_schleuderer * units.schleuderer.cost.silber + loss_off_hopliten * units.hopliten_def.cost.silber + loss_off_reiter * units.reiter.cost.silber;
+            const off_loss_total = off_loss_stein + off_loss_holz + off_loss_silber;
+            const off_loss_time = loss_off_schleuderer * units.schleuderer.cost.time + loss_off_hopliten * units.hopliten_def.cost.time + loss_off_reiter * units.reiter.cost.time;
+            
+            document.getElementById('holz_def_loss').textContent = def_loss_holz;
+            document.getElementById('silber_def_loss').textContent = def_loss_silber;
+            document.getElementById('stein_def_loss').textContent = def_loss_stein;
+            document.getElementById('insgesamt_def_loss').textContent = def_loss_total;
+            document.getElementById('zeit_def_loss').textContent = secondsToTime(def_loss_time);
+            
+            document.getElementById('holz_off_loss').textContent = off_loss_holz;
+            document.getElementById('silber_off_loss').textContent = off_loss_silber;
+            document.getElementById('stein_off_loss').textContent = off_loss_stein;
+            document.getElementById('insgesamt_off_loss').textContent = off_loss_total;
+            document.getElementById('zeit_off_loss').textContent = secondsToTime(off_loss_time);
+
+            //benoetigteHopliten;
+            //benoetigteHopliten;
+            //benoetigteReiter;
+            //benoetigteSchleuderer;
+
+            document.getElementById('min_cost_att_schlag').textContent = Math.round(defSchlag * ressourcen4schlag) + " = Reiter "+benoetigteReiter;
+            document.getElementById('min_cost_att_stich').textContent = Math.round(defStich * ressourcen4stich) + " = Hopliten  "+benoetigteHopliten + " = Streitwagen "+benoetigteStreitwagen;
+            document.getElementById('min_cost_att_fern').textContent = Math.round(defFern * ressourcen4fern) + " = Schleuderer "+benoetigteSchleuderer;
+        }
+    </script>
+</body>
+</html>

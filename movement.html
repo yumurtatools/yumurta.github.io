@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uhrzeiten - Angriff, Verteidigung & Unterstützung</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+            background-color: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .angriff th { background-color: #ffcccc; }
+        .verteidigung th { background-color: #ccffcc; }
+        .unterstuetzung th { background-color: #ccccff; } /* Blau für Unterstützung */
+
+        #dauerContainer, #unterstuetzungContainer {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ereignisse: Angriff, Verteidigung & Unterstützung</h1>
+    
+    <form id="uhrzeitForm">
+        <label for="label">Kategorie:</label>
+        <select id="label" required>
+            <option value="">-- Wählen --</option>
+            <option value="Angriff">Angriff</option>
+            <option value="Verteidigung">Verteidigung</option>
+            <option value="Unterstuetzung">Unterstützung</option>
+        </select>
+
+        <label for="label">Einheitentyp:</label>
+        <select id="Einheitentyp" required>
+            <option value="">-- Wählen --</option>
+            <option value="Andere">Andere</option>
+            <option value="Bireme">Bireme</option>
+            <option value="Transe">Transe</option>
+            <option value="Feuerschiff">Feuerschiff</option>
+            <option value="Tireme">Tireme</option>
+            <option value="Brander">Brander</option>
+            <option value="Kolo">Kolo</option>
+        </select>
+
+        <label for="uhrzeit">Ankunftszeit (HH:MM:SS):</label>
+        <input type="text" id="uhrzeit" placeholder="z.B. 14:25:08" 
+               pattern="([01]?\d|2[0-3]):[0-5]\d:[0-5]\d" required>
+
+        <label>Spielgeschwindigkeit: <input type="number" id="servergeschwindigkeit" min="1" value="2"></label>
+
+        <div id="dauerContainer">
+            <label for="dauer">Dauer (HH:MM:SS):</label>
+            <input type="text" id="dauer" placeholder="z.B. 00:10:00" 
+                   pattern="([01]?\d|2[0-3]):[0-5]\d:[0-5]\d">
+        </div>
+
+        <div id="unterstuetzungContainer">
+            <label for="unterstuetzungDauer">Dauer (HH:MM:SS):</label>
+            <input type="text" id="unterstuetzungDauer" placeholder="z.B. 13:50:00" 
+                   pattern="([01]?\d|2[0-3]):[0-5]\d:[0-5]\d">
+        </div>
+        
+        <label for="beschreibung">Beschreibung:</label>
+        <textarea id="beschreibung" rows="3" placeholder="Was ist passiert?" required></textarea>
+        
+        <button type="submit">Hinzufügen</button>
+    </form>
+    
+    <h2 class="angriff">Angriffe</h2>
+    <table id="angriffTabelle" class="angriff">
+        <thead>
+            <tr>
+                <th>Uhrzeit</th>
+                <th>Einheitentyp</th>
+                <th>Beschreibung</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2 class="verteidigung">Verteidigungen</h2>
+    <table id="verteidigungTabelle" class="verteidigung">
+        <thead>
+            <tr>
+                <th>Ankunft (zur Verteidigung)</th>
+                <th>Abfahrt</th>
+                <th>Abbruch</th>
+                <th>Beschreibung</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2 class="unterstuetzung">Unterstützungen</h2>
+    <table id="unterstuetzungTabelle" class="unterstuetzung">
+        <thead>
+            <tr>
+                <th>Abfahrtszeit</th>
+                <th>Ankunftszeit</th>
+                <th>Dauer</th>
+                <th>Einheitentyp</th>
+                <th>Beschreibung</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2 class="unterstuetzung">Unterstützungen (alternative Abfahrtszeiten)</h2>
+    <table id="unterstuetzungTabelleAndereZeiten" class="unterstuetzung">
+        <thead>
+            <tr>
+                <th>Abfahrtszeit</th>
+                <th>Ankunftszeit</th>
+                <th>Dauer</th>
+                <th>Einheitentyp</th>
+                <th>Beschreibung</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('uhrzeitForm');
+        const labelSelect = document.getElementById('label');
+        const dauerContainer = document.getElementById('dauerContainer');
+        const unterstuetzungContainer = document.getElementById('unterstuetzungContainer');
+
+        const angriffBody = document.getElementById('angriffTabelle').querySelector('tbody');
+        const verteidigungBody = document.getElementById('verteidigungTabelle').querySelector('tbody');
+        const unterstuetzungBody = document.getElementById('unterstuetzungTabelle').querySelector('tbody');
+        const unterstuetzungBodyAndereZeiten = document.getElementById('unterstuetzungTabelleAndereZeiten').querySelector('tbody');
+
+        const Einheitentyp = document.getElementById('Einheitentyp');
+
+        const GBireme = 45;
+        const GTranse = 24;
+        const GTireme = 45;
+        const GKolo = 9;
+        const GFeuerschiff = 39;
+        const GBrander = 15;
+
+        speeds = {
+        "Bireme": GBireme,
+        "Transe": GTranse,
+        "Tireme": GTireme,
+        "Kolo": GKolo,
+        "Feuerschiff": GFeuerschiff,
+        "Brander": GBrander
+        }
+  
+        const Spielgeschwindigkeit = parseInt(document.getElementById('servergeschwindigkeit').value) || 0;
+        const Ruestzeit = 900/Spielgeschwindigkeit;
+
+        // Felder ein-/ausblenden je nach Kategorie
+        labelSelect.addEventListener('change', function() {
+            const value = this.value;
+            dauerContainer.style.display = 'none';
+            unterstuetzungContainer.style.display = 'none';
+            document.getElementById('dauer').required = false;
+            document.getElementById('unterstuetzungDauer').required = false;
+
+            if (value === 'Verteidigung') {
+                dauerContainer.style.display = 'block';
+                document.getElementById('dauer').required = true;
+            } else if (value === 'Unterstuetzung') {
+                unterstuetzungContainer.style.display = 'block';
+                document.getElementById('unterstuetzungDauer').required = true;
+            }
+        });
+
+        // Hilfsfunktionen für Zeitberechnung
+        function timeToSeconds(time) {
+            const [h, m, s] = time.split(':').map(Number);
+            return h * 3600 + m * 60 + s;
+        }
+
+        function secondsToTime(totalSeconds) {
+            let secs = totalSeconds % 86400;
+            if (secs < 0) secs += 86400;
+            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+            const s = (secs % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function subtractDuration(baseTime, duration) {
+            const baseSecs = timeToSeconds(baseTime);
+            const durSecs = timeToSeconds(duration);
+            return secondsToTime(baseSecs - durSecs);
+        }
+
+        function convertRunningTime(runningTime, fromSpeed, toSpeed) {
+            let oldDuration = timeToSeconds(runningTime);
+            oldDuration = oldDuration - Ruestzeit;
+            let newDuration = Math.round(oldDuration*fromSpeed/toSpeed + Ruestzeit);
+            return secondsToTime(newDuration);
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const label = labelSelect.value;
+            const beschreibung = document.getElementById('beschreibung').value.trim();
+
+            if (!label) {
+                alert('Bitte eine Kategorie auswählen!');
+                return;
+            }
+            if (!beschreibung) {
+                alert('Bitte eine Beschreibung eingeben!');
+                return;
+            }
+
+            let neueZeile;
+
+            if (label === 'Angriff') {
+                const uhrzeit = document.getElementById('uhrzeit').value.trim();
+                if (!uhrzeit.match(/^([01]?\d|2[0-3]):[0-5]\d:[0-5]\d$/)) {
+                    alert('Ungültige Uhrzeit!');
+                    return;
+                }
+                neueZeile = document.createElement('tr');
+                neueZeile.innerHTML = `
+                <td>${uhrzeit}</td>
+                <td>${Einheitentyp.value}</td>
+                <td>${beschreibung}</td>
+                `;
+                angriffBody.appendChild(neueZeile);
+
+            } else if (label === 'Verteidigung') {
+                const ankunft = document.getElementById('uhrzeit').value.trim();
+                const dauer = document.getElementById('dauer').value.trim();
+
+                if (!ankunft.match(/^([01]?\d|2[0-3]):[0-5]\d:[0-5]\d$/)) {
+                    alert('Ungültige Ankunftszeit!');
+                    return;
+                }
+                if (!dauer || !dauer.match(/^([01]?\d|2[0-3]):[0-5]\d:[0-5]\d$/)) {
+                    alert('Ungültige oder fehlende Dauer!');
+                    return;
+                }
+
+                const abbruch = subtractDuration(ankunft, dauer);
+                const abfahrt = subtractDuration(abbruch, dauer);
+
+                neueZeile = document.createElement('tr');
+                neueZeile.innerHTML = `
+                    <td>${ankunft}</td>
+                    <td>${abfahrt}</td>
+                    <td>${abbruch}</td>
+                    <td>${beschreibung}</td>
+                `;
+                verteidigungBody.appendChild(neueZeile);
+
+            } else if (label === 'Unterstuetzung') {
+                let dauer = document.getElementById('unterstuetzungDauer').value.trim();
+                const ankunft = document.getElementById('uhrzeit').value.trim();
+		              let abfahrt = subtractDuration(ankunft, dauer);
+
+                if (!abfahrt.match(/^([01]?\d|2[0-3]):[0-5]\d:[0-5]\d$/) ||
+                    !ankunft.match(/^([01]?\d|2[0-3]):[0-5]\d:[0-5]\d$/)) {
+                    alert('Ungültige Abfahrts- oder Ankunftszeit!');
+                    return;
+                }
+
+                neueZeile = document.createElement('tr');
+                neueZeile.innerHTML = `
+                    <td>${abfahrt}</td>
+                    <td>${ankunft}</td>
+                    <td>${dauer}</td>
+                    <td>${Einheitentyp.value}</td>
+                    <td>${beschreibung}</td>
+                `;
+                unterstuetzungBody.appendChild(neueZeile);
+
+                dauerT = convertRunningTime(dauer, speeds[Einheitentyp.value], speeds["Transe"]);
+                abfahrt = subtractDuration(ankunft, dauerT);
+                neueZeile = document.createElement('tr');
+                neueZeile.innerHTML = `
+                    <td>${abfahrt}</td>
+                    <td>${ankunft}</td>
+                    <td>${dauerT}</td>
+                    <td>Transe</td>
+                    <td>${beschreibung}</td>
+                `;
+                unterstuetzungBodyAndereZeiten.appendChild(neueZeile);
+
+                dauerT = convertRunningTime(dauer, speeds[Einheitentyp.value], speeds["Feuerschiff"]);
+                abfahrt = subtractDuration(ankunft, dauerT);
+                neueZeile = document.createElement('tr');
+                neueZeile.innerHTML = `
+                    <td>${abfahrt}</td>
+                    <td>${ankunft}</td>
+                    <td>${dauerT}</td>
+                    <td>Feuerschiff</td>
+                    <td>${beschreibung}</td>
+                `;
+                unterstuetzungBodyAndereZeiten.appendChild(neueZeile);
+
+                dauerT = convertRunningTime(dauer, speeds[Einheitentyp.value], speeds["Bireme"]);
+                abfahrt = subtractDuration(ankunft, dauerT);
+                neueZeile = document.createElement('tr');
+                neueZeile.innerHTML = `
+                    <td>${abfahrt}</td>
+                    <td>${ankunft}</td>
+                    <td>${dauerT}</td>
+                    <td>Bireme/Tireme/flotte Transe</td>
+                    <td>${beschreibung}</td>
+                `;
+                unterstuetzungBodyAndereZeiten.appendChild(neueZeile);
+            }          
+
+            // Formular zurücksetzen
+            form.reset();
+            dauerContainer.style.display = 'none';
+            unterstuetzungContainer.style.display = 'none';
+            labelSelect.value = '';
+        });
+    </script>
+</body>
+</html>

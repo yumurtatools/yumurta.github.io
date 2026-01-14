@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deff Optimierer</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f9; }
+        .container { max-width: 500px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .field-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #218838; }
+        .output-section { margin-top: 20px; padding-top: 20px; border-top: 2px solid #eee; }
+        .output-field { background-color: #e9ecef; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Einheiten-Rechner</h2>
+    
+    <div class="field-group">
+        <label>Anzahl an freien Bauernhofplätze</label>
+        <input type="number" id="bh_plaetze" value="0">
+    </div>
+    <div class="field-group">
+        <label>Anzahl Miliz</label>
+        <input type="number" id="miliz" value="0">
+    </div>
+    <div class="field-group">
+        <label>Vorhandene Schlagwaffen Def</label>
+        <input type="number" id="def_schlag" value="0">
+    </div>
+    <div class="field-group">
+        <label>Vorhandene Fernwaffen Def</label>
+        <input type="number" id="def_fern" value="0">
+    </div>
+    <div class="field-group">
+        <label>Vorhandene Stichwaffen Def</label>
+        <input type="number" id="def_stich" value="0">
+    </div>
+
+    <div class="field-group">
+        <label>Optimieren nach:</label>
+        <select id="optimierung">
+            <option value="Zeit">Zeit</option>
+            <option value="Ressourcen">Ressourcen</option>
+            <option value="Bauernhofplaetze">Bauernhofplätze</option>
+        </select>
+    </div>
+
+    <button onclick="berechne()">Berechne</button>
+
+    <div class="output-section">
+        <div class="field-group">
+            <label>Anzahl Schwertkämpfer</label>
+            <input type="text" id="out_schwert" class="output-field" readonly>
+        </div>
+        <div class="field-group">
+            <label>Anzahl Hopliten</label>
+            <input type="text" id="out_hoplit" class="output-field" readonly>
+        </div>
+        <div class="field-group">
+            <label>Anzahl Bogenschützen</label>
+            <input type="text" id="out_bogen" class="output-field" readonly>
+        </div>
+        <hr>
+        <h3>Kosten fuer den Angreifer</h3>
+        <hr>
+        <div class="field-group">
+            <label>Kosten Schlag (res)</label>
+            <input type="text" id="schlag_kosten" class="output-field" readonly>
+        </div>
+        <div class="field-group">
+            <label>Kosten Stich (res)</label>
+        <input type="text" id="stich_kosten" class="output-field" readonly>
+        <div class="field-group">
+            <label>Kosten Fern (res)</label>
+        <input type="text" id="fern_kosten" class="output-field" readonly>
+        <hr>
+        <div class="field-group">
+            <label>Kosten Schlag (bhp)</label>
+            <input type="text" id="schlag_kosten_bhp" class="output-field" readonly>
+        </div>
+        <div class="field-group">
+            <label>Kosten Stich (bhp (Streitwagen) )</label>
+        <input type="text" id="stich_kosten_bhp" class="output-field" readonly>
+        <div class="field-group">
+            <label>Kosten Fern (bhp)</label>
+        <input type="text" id="fern_kosten_bhp" class="output-field" readonly>
+        </div>
+        <hr>
+        <div class="field-group">
+            <label>Kosten Schlag (h:m:s (Kaserne 5))</label>
+            <input type="text" id="schlag_kosten_time" class="output-field" readonly>
+        </div>
+        <div class="field-group">
+            <label>Kosten Stich (h:m:s (Kaserne 5))</label>
+        <input type="text" id="stich_kosten_time" class="output-field" readonly>
+        <div class="field-group">
+            <label>Kosten Fern (h:m:s (Kaserne 5))</label>
+        <input type="text" id="fern_kosten_time" class="output-field" readonly>
+        </div>
+        <hr>
+        <h3>Kosten fuer die Verteidigung</h3>
+        <hr>
+        <div class="field-group">
+            <label>Kosten (alle Ressourcen)</label>
+        <input type="text" id="verteidigung_kosten" class="output-field" readonly>
+        </div>
+        <div class="field-group">
+            <label>Kosten (h:m:s)</label>
+        <input type="text" id="verteidigung_kosten_zeit" class="output-field" readonly>
+        </div>
+    </div>
+</div>
+
+<script>
+        function secondsToTime(totalSeconds) {
+            let secs = totalSeconds;
+            if (secs < 0) secs += 86400;
+            const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+            const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+            const s = (secs % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+        
+    function berechne() {
+        // Inputs holen
+        const bh = parseInt(document.getElementById('bh_plaetze').value) || 0;
+        const modus = document.getElementById('optimierung').value;
+        const miliz = parseInt(document.getElementById('miliz').value) || 0;
+        let def_schlag_schon_in_der_stadt = parseInt(document.getElementById('def_schlag').value) || 0;
+        let def_stich_schon_in_der_stadt = parseInt(document.getElementById('def_stich').value) || 0;
+        let def_fern_schon_in_der_stadt = parseInt(document.getElementById('def_fern').value) || 0;
+        
+        def_schlag_schon_in_der_stadt = def_schlag_schon_in_der_stadt + miliz*6;
+        def_stich_schon_in_der_stadt = def_stich_schon_in_der_stadt + miliz*8;
+        def_fern_schon_in_der_stadt = def_fern_schon_in_der_stadt + miliz*4;
+        
+        // kosten sind jeweils alle Ressourcen zusammen
+        const cost_res_reiter = 240+120+360;
+        const cost_res_hoplit = 75+150;
+        const cost_res_streitwagen = 200+440+320;
+        const cost_res_schleuderer = 55+100+40;
+        const cost_res_schwert = 95+85;
+        const cost_res_bogen = 120+75;
+        
+        const cost_res4schlag = cost_res_reiter/60;
+        const cost_res4stich = cost_res_hoplit/16; // = 14.06
+        // or cost_res_streitwagen/56 = 17.142
+        // => Hopliten sind kosteneffizienter
+        const cost_res4fern = cost_res_schleuderer/23;
+        
+        const cost_b_reiter = 3;
+        const cost_b_hoplit = 1;
+        const cost_b_streitwagen = 4;
+        const cost_b_schleuderer = 1;
+        
+        const cost_b4schlag = cost_b_reiter/60;
+        // const cost_b4stich = cost_b_hoplit/16; // = 0.625
+        const cost_b4stich = cost_b_streitwagen/56; // = 0.071428;
+        // => Streitwagen sind kosteneffizienter
+        const cost_b4fern = cost_b_schleuderer/23;
+        
+        // Alle Werte bei Kaserne 5 in sek. (aber egal, so lange das Verhaeltnis der Einheiten gleich ist)
+        const cost_time_reiter = 33*60+53;
+        const cost_time_hoplit = 10*60+49;
+        const cost_time_streitwagen = 45*60+11;
+        const cost_time_schleuderer = 9*60+25;
+        const cost_time_schwert = 7*60+44;
+        const cost_time_bogen = 8*60+9;
+        
+        const cost_time4schlag = cost_time_reiter/60;
+        const cost_time4stich = cost_time_hoplit/16; // = 40.56
+        // const cost_time4stich = cost_time_streitwagen/56; // = 48.41
+        const cost_time4fern = cost_time_schleuderer/23;
+        
+        //let scaleSchlag = 100;
+        //let scaleSchlag = 100;
+        
+        let def4Schlag = 0;
+        let def4Stich = 0;
+        let def4Fern = 0;
+        
+        // Fuer Kosten (fuer den Angreifer) von 100 wieviel def Werte werden benoetigt.
+        if (modus === "Zeit") {
+            def4Schlag = 100/cost_time4schlag;
+            def4Stich = 100/cost_time4stich;
+            def4Fern = 100/cost_time4fern;
+        } else if (modus === "Ressourcen") {
+            def4Schlag = 100/cost_res4schlag;
+            def4Stich = 100/cost_res4stich;
+            def4Fern = 100/cost_res4fern;
+        } else if (modus === "Bauernhofplaetze") {
+            def4Schlag = 100/cost_b4schlag; // every type should cost the same number of bauernhofplaetze
+            def4Stich = 100/cost_b4stich;
+            def4Fern = 100/cost_b4fern;
+        }
+        //def4Schlag = def4Schlag - def_schlag_schon_in_der_stadt;
+        //def4Stich = def4Stich - def_stich_schon_in_der_stadt;
+        //def4Fern = def4Fern - def_fern_schon_in_der_stadt;
+        
+        // to get these formulas we need to invert a def matrix of the form
+        // columns: Schwertkaempfer, Hoplit, Bogen
+        // rows: V_schlag, V_stich, V_fern
+        //  14 18 7
+        //  8  12 25
+        //  30 7  13
+        //
+        //This matrix describes a map (n_Schwertkaempfer, n_Hoplit, n_Bogen) -> (total_V_schlag, total_V_stich, total_V_fern)
+        // This results in:
+        // 
+        // -1/486 -185/9234 61/1539
+        // 17/243 -14/4617  -49/1539
+        // -8/243 221/4617  4/1539
+        //
+        // The inverse describes a map:
+        //
+        // (total_V_schlag, total_V_stich, total_V_fern) -> (n_Schwertkaempfer, n_Hoplit, n_Bogen)
+        let n_Schwertkaempfer = -1/486 * def4Schlag - 185/9234 * def4Stich + 61/1539 * def4Fern;
+        let n_Hopliten = 17/243 * def4Schlag - 14/4617 * def4Stich - 49/1539 * def4Fern;
+        let n_Bogen = -8/243 * def4Schlag + 221/4617 * def4Stich + 4/1539 * def4Fern;
+        
+        // _sindS = "schon in der Stadt" refers to virtual units
+        let n_Schwertkaempfer_sindS = -1/486 * def_schlag_schon_in_der_stadt - 185/9234 * def_stich_schon_in_der_stadt + 61/1539 * def_fern_schon_in_der_stadt;
+        let n_Hopliten_sindS = 17/243 * def_schlag_schon_in_der_stadt - 14/4617 * def_stich_schon_in_der_stadt - 49/1539 * def_fern_schon_in_der_stadt;
+        let n_Bogen_sindS = -8/243 * def_schlag_schon_in_der_stadt + 221/4617 * def_stich_schon_in_der_stadt + 4/1539 * def_fern_schon_in_der_stadt;
+        
+        // We scale to each the desired number of bauernhof pl.
+        let scale_factor = (bh + (n_Schwertkaempfer_sindS+n_Hopliten_sindS+n_Bogen_sindS) )   /    (n_Schwertkaempfer + n_Hopliten + n_Bogen);
+        
+        let schwert = Math.round(n_Schwertkaempfer*scale_factor - n_Schwertkaempfer_sindS);
+        let hoplit = Math.round(n_Hopliten*scale_factor - n_Hopliten_sindS);
+        let bogen = Math.round(n_Bogen*scale_factor - n_Bogen_sindS);
+
+        // Ergebnisse ausgeben
+        document.getElementById('out_schwert').value = schwert;
+        document.getElementById('out_hoplit').value = hoplit;
+        document.getElementById('out_bogen').value = bogen;
+        
+        document.getElementById('schlag_kosten').value = Math.round( (schwert * 14 + hoplit * 18 + bogen * 7 + def_schlag_schon_in_der_stadt) * cost_res4schlag );
+        document.getElementById('stich_kosten').value = Math.round( (schwert * 8 + hoplit * 12 + bogen * 25 + def_stich_schon_in_der_stadt) * cost_res4stich );
+        document.getElementById('fern_kosten').value = Math.round( (schwert * 30 + hoplit * 7 + bogen * 13 + def_fern_schon_in_der_stadt) * cost_res4fern );
+        
+        document.getElementById('schlag_kosten_bhp').value = Math.round( (schwert * 14 + hoplit * 18 + bogen * 7 + def_schlag_schon_in_der_stadt) * cost_b4schlag );
+        document.getElementById('stich_kosten_bhp').value = Math.round( (schwert * 8 + hoplit * 12 + bogen * 25 + def_stich_schon_in_der_stadt) * cost_b4stich );
+        document.getElementById('fern_kosten_bhp').value = Math.round( (schwert * 30 + hoplit * 7 + bogen * 13 + def_fern_schon_in_der_stadt) * cost_b4fern );
+        
+        document.getElementById('schlag_kosten_time').value = secondsToTime(Math.round( (schwert * 14 + hoplit * 18 + bogen * 7 + def_schlag_schon_in_der_stadt) * cost_time4schlag));
+        document.getElementById('stich_kosten_time').value = secondsToTime(Math.round( (schwert * 8 + hoplit * 12 + bogen * 25 + def_stich_schon_in_der_stadt) * cost_time4stich));
+        document.getElementById('fern_kosten_time').value = secondsToTime(Math.round( (schwert * 30 + hoplit * 7 + bogen * 13 + def_fern_schon_in_der_stadt) * cost_time4fern));
+        
+        document.getElementById('verteidigung_kosten').value = schwert * cost_time_schwert + bogen * cost_time_bogen + hoplit * cost_time_hoplit;
+        document.getElementById('verteidigung_kosten_zeit').value = secondsToTime(schwert * cost_time_schwert + bogen * cost_time_bogen + hoplit * cost_time_hoplit);
+    }
+</script>
+
+</body>
+</html>
