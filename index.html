@@ -1,9 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Website is coming</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grepolis Tools von Yumurta</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            width: 90%;
+            max-width: 1000px;
+            padding: 2rem 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .card h2 {
+            margin: 0.5rem 0;
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>In process</h1>
+
+    <header>
+        <h1>Tools for Grepolis</h1>
+        <p>Select a tool</p>
+    </header>
+
+    <div class="container">
+        <a href="deff_optimizer.html" class="card">
+            <div class="icon">🛡️</div>
+            <h2>Defense Optimizer</h2>
+            <p>Optimize your defense for a city</p>
+        </a>
+
+        <a href="movement.html" class="card">
+            <div class="icon">🏃</div>
+            <h2>Movement Planer</h2>
+            <p>Plan movement of troops to defend your city</p>
+        </a>
+
+        <a href="rechner.html" class="card">
+            <div class="icon">🔢</div>
+            <h2>Battle Simulator</h2>
+            <p>Simulates battles like in the Agora but shows ressources and weaknesses of the defense (works accurately for nukes only atm).</p>
+        </a>
+
+        <a href="ressource_rechner.html" class="card">
+            <div class="icon">📦</div>
+            <h2>Resource Rechner</h2>
+            <p>Manage and calculate resources of your army.</p>
+        </a>
+    </div>
+
 </body>
 </html>
