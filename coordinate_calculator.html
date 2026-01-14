@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>City A & B – Relative Positions (hh:mm:ss input)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --marble:      #f8f1e9;
+      --marble-dark:  #e8d9c5;
+      --gold:         #d4a017;
+      --gold-dark:    #b8860b;
+      --night:        #0d1b2a;
+      --deep-blue:    #1b263b;
+      --accent:       #e9c46a;
+      --text:         #2d1e12;
+      --text-light:   #5c4033;
+      --border:       #c9a87c;
+      --shadow:       rgba(0,0,0,0.25);
+      --egg-glow:     rgba(212,160,23,0.4);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(180deg, var(--night) 0%, #1a2a44 40%, #2a3b5a 100%);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 16px;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(233,196,106,0.08) 0%, transparent 8%),
+        radial-gradient(circle at 85% 75%, rgba(212,160,23,0.06) 0%, transparent 10%);
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--marble);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      box-shadow: 0 12px 48px var(--shadow),
+                  inset 0 0 0 1px rgba(212,160,23,0.15);
+      position: relative;
+    }
+
+    /* Greek key / meander subtle border pattern */
+    .container::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border: 3px solid transparent;
+      border-image: repeating-linear-gradient(45deg, var(--gold), var(--gold) 8px, transparent 8px, transparent 16px) 1;
+      pointer-events: none;
+      z-index: 1;
+      border-radius: 18px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2a1e0f 0%, #3d2a12 100%);
+      padding: 36px 32px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "✧";
+      position: absolute;
+      top: 12px; left: 20px;
+      font-size: 2.8rem;
+      color: var(--gold);
+      opacity: 0.25;
+      transform: rotate(-15deg);
+    }
+
+    header::after {
+      content: "✦";
+      position: absolute;
+      bottom: 10px; right: 24px;
+      font-size: 2.4rem;
+      color: var(--accent);
+      opacity: 0.3;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 2.1rem;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .content {
+      padding: 36px 32px 40px;
+      position: relative;
+    }
+
+    /* Decorative fantasy eggs */
+    .egg-deco {
+      position: absolute;
+      font-size: 2.4rem;
+      opacity: 0.18;
+      pointer-events: none;
+      user-select: none;
+    }
+    #egg1 { top: -10px; left: 20px; transform: rotate(-20deg); }
+    #egg2 { bottom: 60px; right: 30px; transform: rotate(15deg); font-size: 2.8rem; }
+    #egg3 { top: 180px; right: -12px; transform: rotate(-8deg); opacity: 0.22; }
+
+    .field {
+      margin: 24px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    label {
+      flex: 1 0 340px;
+      font-weight: 500;
+      color: var(--text-light);
+      font-size: 1.05rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      flex: 0 0 190px;
+      padding: 11px 16px;
+      font-size: 1.08rem;
+      font-family: 'Courier New', monospace;
+      background: rgba(255,248,235,0.75);
+      border: 1px solid #d4b37f;
+      border-radius: 10px;
+      color: #2d1e12;
+      transition: all 0.18s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px var(--egg-glow);
+      background: white;
+    }
+
+    button {
+      margin: 40px auto 20px;
+      display: block;
+      padding: 16px 56px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.22rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(90deg, #b8860b, #d4a017, #e9c46a);
+      background-size: 200% 100%;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(180,140,40,0.5);
+      transition: all 0.25s;
+    }
+
+    button:hover {
+      background-position: 100% 0;
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 12px 32px rgba(212,160,23,0.6);
+    }
+
+    .output {
+      margin-top: 36px;
+      padding: 28px;
+      background: rgba(248,241,233,0.65);
+      border: 1px solid #d4b37f;
+      border-radius: 14px;
+      backdrop-filter: blur(4px);
+      line-height: 1.7;
+      display: none;
+    }
+
+    .output strong {
+      display: inline-block;
+      width: 250px;
+      color: #8b6f47;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+    }
+
+    .variant {
+      margin: 12px 0 12px 28px;
+      padding-left: 18px;
+      border-left: 3px solid var(--gold);
+      font-family: monospace;
+      color: #3d2a12;
+    }
+
+    .distance {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px dashed #c9a87c;
+      font-weight: 600;
+      color: #a67c00;
+      font-size: 1.1rem;
+    }
+
+    .note, .help {
+      margin-top: 28px;
+      font-size: 0.96rem;
+      color: #5c4033;
+      line-height: 1.6;
+    }
+
+    .help strong {
+      color: #8b6f47;
+    }
+
+    .error {
+      color: #9b2d30;
+      font-weight: 600;
+    }
+
+    @media (max-width: 580px) {
+      .field { flex-direction: column; align-items: stretch; }
+      label, input { width: 100%; flex: none; }
+      input { margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h2>Relative positions of City A and City B</h2>
+  </header>
+
+  <div class="content">
+
+    <div class="egg-deco" id="egg1">🥚</div>
+    <div class="egg-deco" id="egg2">✧🥚</div>
+    <div class="egg-deco" id="egg3">🥚</div>
+
+    <div class="field">
+      <label>Server speed (units per second):</label>
+      <input type="number" id="speed" value="2" step="any" min="0.01">
+    </div>
+
+    <div class="field">
+      <label>Time 1st city → 2nd city (hh:mm:ss):</label>
+      <input type="text" id="t1t2" value="02:24:00" placeholder="hh:mm:ss">
+    </div>
+
+    <div class="field">
+      <label>Time 1st city → A (hh:mm:ss):</label>
+      <input type="text" id="t1A" value="02:24:00" placeholder="hh:mm:ss">
+    </div>
+
+    <div class="field">
+      <label>Time 2nd city → A (hh:mm:ss):</label>
+      <input type="text" id="t2A" value="03:06:00" placeholder="hh:mm:ss">
+    </div>
+
+    <div class="field">
+      <label>Time 1st city → B (hh:mm:ss):</label>
+      <input type="text" id="t1B" value="04:48:00" placeholder="hh:mm:ss">
+    </div>
+
+    <div class="field">
+      <label>Time 2nd city → B (hh:mm:ss):</label>
+      <input type="text" id="t2B" value="01:54:00" placeholder="hh:mm:ss">
+    </div>
+
+    <button onclick="calculate()">Calculate positions</button>
+
+    <div class="output" id="result">
+      <div><strong>City A coordinates:</strong></div>
+      <div id="outA1" class="variant"></div>
+      <div id="outA2" class="variant"></div>
+
+      <div style="margin: 32px 0 14px 0;"><strong>City B coordinates:</strong></div>
+      <div id="outB1" class="variant"></div>
+      <div id="outB2" class="variant"></div>
+
+      <div class="distance">
+        <strong>Possible travel times A ↔ B:</strong><br>
+        <div id="dist1"></div>
+        <div id="dist2"></div>
+      </div>
+
+      <div class="note">
+        First city at <strong>(0, 0)</strong><br>
+        Second city at <strong>(d, 0)</strong><br>
+        Coordinates in units = speed × (seconds − ruestzeit)
+      </div>
+    </div>
+
+    <div class="help">
+      <strong>Input format examples:</strong><br>
+      • 02:30:45<br>
+      • 1:15:00<br>
+      • 45:30<br>
+      • 0:03:12.5<br>
+      • 3661 (treated as seconds)
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Your original JavaScript remains 100% unchanged — just paste it here
+function parseHMS(str) { /* ... your code ... */ }
+function toHMS(totalSeconds) { /* ... */ }
+function safeSqrt(x) { /* ... */ }
+function calculate() { /* ... your full calculate function ... */ }
+</script>
+
+</body>
+</html>
