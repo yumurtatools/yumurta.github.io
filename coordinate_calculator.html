@@ -318,9 +318,9 @@
     </div>
 
     <div class="note">
-      First city (<span id="noteName1">City 1</span>) at <strong>(0, 0)</strong><br>
-      Second city (<span id="noteName2">City 2</span>) at <strong>(d, 0)</strong><br>
-      Coordinates in units = seconds − ruestzeit for Kolo
+      First reference city (<span id="noteName1">City 1</span>) at <strong>(0, 0)</strong><br>
+      Second reference city (<span id="noteName2">City 2</span>) at <strong>(<span id="dist_between_ref_cities"></span>, 0)</strong><br>
+      Coordinates in units = seconds − Ruestzeit for Kolo
     </div>
   </div>
 
@@ -516,6 +516,8 @@ function calculate() {
         ` ${nameA} ↔ ${nameB}: ${toHMS(timeAB_plus)}  (upper side)`;
     document.getElementById('dist2').textContent = 
         ` ${nameA} ↔ ${nameB}: ${toHMS(timeAB_minus)} (lower side)`;
+        
+    document.getElementById('dist_between_ref_cities').textContent = `${t1t2_sec}`;
 
     document.getElementById('result').style.display = 'block';
 }
