@@ -234,7 +234,7 @@
 
 <div class="container">
   <header>
-    <h2>Relative positions of City A and City B</h2>
+    <h2>Compute the running time between any pair of cities</h2>
   </header>
 
   <div class="content">
@@ -243,6 +243,7 @@
   <div style="margin-bottom: 32px; padding: 20px; background: rgba(212,160,23,0.08); border-radius: 12px; border: 1px solid rgba(212,160,23,0.25);">
     <h3 style="margin: 0 0 20px 0; color: var(--gold); font-size: 1.4rem;">Location Names</h3>
     
+    We need to have at least two cities (best three) to measure relative travel times. They should have all the same speed   modifiers.
     <div class="field">
       <label>First reference city name:</label>
       <input type="text" id="name1" value="City 1" placeholder="e.g. Rome, Sparta, ...">
@@ -276,27 +277,27 @@
 
     <div class="field">
     <label>Time <span id="lblName1">City 1</span> → <span id="lblName2">City 2</span> (hh:mm:ss):</label>
-    <input type="text" id="t1t2" value="02:24:00" placeholder="hh:mm:ss">
+    <input type="text" id="t1t2" value="06:21:14" placeholder="hh:mm:ss">
   </div>
 
   <div class="field">
     <label>Time <span id="lblName1a">City 1</span> → <span id="lblNameA_a">City A</span> (hh:mm:ss for Kolo):</label>
-    <input type="text" id="t1A" value="02:24:00" placeholder="hh:mm:ss">
+    <input type="text" id="t1A" value="05:56:38" placeholder="hh:mm:ss">
   </div>
 
   <div class="field">
     <label>Time <span id="lblName2a">City 2</span> → <span id="lblNameA_b">City A</span> (hh:mm:ss for Kolo):</label>
-    <input type="text" id="t2A" value="03:06:00" placeholder="hh:mm:ss">
+    <input type="text" id="t2A" value="03:25hA:59" placeholder="hh:mm:ss">
   </div>
 
   <div class="field">
     <label>Time <span id="lblName1b">City 1</span> → <span id="lblNameB_a">City B</span> (hh:mm:ss for Kolo):</label>
-    <input type="text" id="t1B" value="04:48:00" placeholder="hh:mm:ss">
+    <input type="text" id="t1B" value="03:12:07" placeholder="hh:mm:ss">
   </div>
 
   <div class="field">
     <label>Time <span id="lblName2b">City 2</span> → <span id="lblNameB_b">City B</span> (hh:mm:ss for Kolo):</label>
-    <input type="text" id="t2B" value="01:54:00" placeholder="hh:mm:ss">
+    <input type="text" id="t2B" value="05:28:38" placeholder="hh:mm:ss">
   </div>
 
     <button onclick="calculate()">Calculate positions</button>
@@ -319,7 +320,7 @@
     <div class="note">
       First city (<span id="noteName1">City 1</span>) at <strong>(0, 0)</strong><br>
       Second city (<span id="noteName2">City 2</span>) at <strong>(d, 0)</strong><br>
-      Coordinates in units = speed × (seconds − ruestzeit)
+      Coordinates in units = seconds − ruestzeit for Kolo
     </div>
   </div>
 
@@ -379,10 +380,145 @@ function updateNames() {
 window.addEventListener('DOMContentLoaded', updateNames);
 // ----------------------------------------------------------------------
 // Your original JavaScript remains 100% unchanged — just paste it here
-function parseHMS(str) { /* ... your code ... */ }
-function toHMS(totalSeconds) { /* ... */ }
-function safeSqrt(x) { /* ... */ }
-function calculate() { /* ... your full calculate function ... */ }
+function parseHMS(input) {
+    if (!input || typeof input !== 'string') return NaN;
+
+    // Remove whitespace
+    input = input.trim();
+
+    // Case 1: already just seconds (e.g. "3661" or "45.5")
+    if (/^[\d.]+$/.test(input)) {
+        const num = parseFloat(input);
+        return isNaN(num) ? NaN : num;
+    }
+
+    // Case 2: hh:mm:ss or h:mm:ss or mm:ss or h:mm or even just mm
+    // Allowed separators: : or .
+    const parts = input.split(/[:.]/).map(p => p.trim());
+
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+
+    if (parts.length === 1) {
+        // just seconds (already handled above)
+        return parseFloat(parts[0]);
+    }
+    else if (parts.length === 2) {
+        // mm:ss
+        minutes = parseInt(parts[0], 10) || 0;
+        seconds = parseFloat(parts[1]) || 0;
+    }
+    else if (parts.length === 3) {
+        // hh:mm:ss
+        hours   = parseInt(parts[0], 10) || 0;
+        minutes = parseInt(parts[1], 10) || 0;
+        seconds = parseFloat(parts[2]) || 0;
+    }
+    else {
+        return NaN;
+    }
+
+    if (minutes > 59 || seconds >= 60 || hours < 0 || minutes < 0 || seconds < 0) {
+        return NaN;
+    }
+
+    return hours * 3600 + minutes * 60 + seconds;
+}
+function toHMS(totalSeconds) {
+    if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
+        return "—";
+    }
+
+    const hours   = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    // Format with leading zeros
+    const h = String(hours).padStart(2, '0');
+    const m = String(minutes).padStart(2, '0');
+    const s = seconds.toFixed(1).replace(/\.0$/, '');  // remove .0 if integer
+
+    if (hours > 0) {
+        return `${h}:${m}:${s.padStart(2, '0')}`;
+    } else if (minutes > 0 || seconds >= 1) {
+        return `${m}:${s.padStart(2, '0')}`;
+    } else {
+        return s;
+    }
+}
+function calculate() {
+   const speed = parseFloat(document.getElementById('speed').value);
+   let ruestzeit = 900/speed;
+   let pos1 = { x: 0, y: 0 };   // First reference city – always (0,0)
+   let pos2 = { x: 0, y: 0 };
+   
+   // Parse all travel times (use your existing parseHMS function)
+   const t1t2_sec = parseHMS(document.getElementById('t1t2').value);
+   const t1A_sec  = parseHMS(document.getElementById('t1A').value);
+   const t2A_sec  = parseHMS(document.getElementById('t2A').value);
+   const t1B_sec  = parseHMS(document.getElementById('t1B').value);
+   const t2B_sec  = parseHMS(document.getElementById('t2B').value);
+   
+   // ── 2. Calculate effective travel times (subtract ruestzeit) ──
+    const d1t2 = t1t2_sec - ruestzeit;   // effective seconds between city 1 ↔ city 2
+    const d1A  = t1A_sec  - ruestzeit;
+    const d2A  = t2A_sec  - ruestzeit;
+    const d1B  = t1B_sec  - ruestzeit;
+    const d2B  = t2B_sec  - ruestzeit;
+
+    // ── 3. Set reference positions ─────────────────────────────
+    pos1 = { x: 0, y: 0 };                      // City 1 / first reference
+    pos2 = { x: d1t2, y: 0 };           // City 2 / second reference (on x-axis)
+
+    // Distance between reference cities (just for reference / checks)
+    const dist12 = pos2.x - pos1.x;             // should be ≈ speed * (t1t2 - ruestzeit)
+
+    // ── 4. Calculate coordinates of A and B ─────────────────────
+    // We solve the system of circles (trilateration in 2D with two points)
+    // A is at distance d1A from pos1 and d2A from pos2
+
+    const xA_num = (d1A*d1A - d2A*d2A + dist12*dist12) / (2 * dist12);
+    const xA = xA_num;
+    const hA = Math.sqrt(d1A*d1A - xA*xA);   // height = ±√(...)
+    const yA_plus  = hA;
+    const yA_minus = -hA;
+
+    // Same for B
+    const xB_num = (d1B*d1B - d2B*d2B + dist12*dist12) / (2 * dist12);
+    const xB = xB_num;
+    const hB = Math.sqrt(d1B*d1B - xB*xB);
+    const yB_plus  = hB;
+    const yB_minus = -hB;
+
+    // ── 5. Output ───────────────────────────────────────────────
+    const nameA = document.getElementById('nameA').value.trim() || "City A";
+    const nameB = document.getElementById('nameB').value.trim() || "City B";
+
+    document.getElementById('outA1').textContent = `${nameA}:  (${xA.toFixed(1)},  ${yA_plus.toFixed(1)})`;
+    document.getElementById('outA2').textContent = `${nameA}:  (${xA.toFixed(1)}, ${yA_minus.toFixed(1)})`;
+
+    document.getElementById('outB1').textContent = `${nameB}:  (${xB.toFixed(1)},  ${yB_plus.toFixed(1)})`;
+    document.getElementById('outB2').textContent = `${nameB}:  (${xB.toFixed(1)}, ${yB_minus.toFixed(1)})`;
+
+    // Optional: show distance between ref cities
+    document.getElementById('dist1').textContent = 
+        `Reference cities distance = ${dist12.toFixed(0)} units ` +
+        `(travel time ${toHMS(t1t2_sec)} = effective ${toHMS(d1t2)} after ruestzeit)`;
+
+    // Show possible A↔B travel times
+    const distAB_plus = Math.hypot(xB - xA, hB + hA);
+    const distAB_minus = Math.hypot(xB - xA, hB - hA);
+    const timeAB_plus  = distAB_plus + ruestzeit;
+    const timeAB_minus = distAB_minus + ruestzeit;
+
+    document.getElementById('dist1').textContent = 
+        ` ${nameA} ↔ ${nameB}: ${toHMS(timeAB_plus)}  (upper side)`;
+    document.getElementById('dist2').textContent = 
+        ` ${nameA} ↔ ${nameB}: ${toHMS(timeAB_minus)} (lower side)`;
+
+    document.getElementById('result').style.display = 'block';
+}
 </script>
 
 </body>
