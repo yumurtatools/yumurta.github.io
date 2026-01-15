@@ -287,7 +287,7 @@
 
   <div class="field">
     <label>Time <span id="lblName2a">City 2</span> → <span id="lblNameA_b">City A</span> (hh:mm:ss for Kolo):</label>
-    <input type="text" id="t2A" value="03:25hA:59" placeholder="hh:mm:ss">
+    <input type="text" id="t2A" value="03:25:59" placeholder="hh:mm:ss">
   </div>
 
   <div class="field">
@@ -452,6 +452,15 @@ function calculate() {
    let ruestzeit = 900/speed;
    let pos1 = { x: 0, y: 0 };   // First reference city – always (0,0)
    let pos2 = { x: 0, y: 0 };
+
+   speeds = {
+        "Bireme": 45,
+        "Transe": 24,
+        "Tireme": 45,
+        "Kolo": 9,
+        "Feuerschiff": 39,
+        "Brander": 15
+   }
    
    // Parse all travel times (use your existing parseHMS function)
    const t1t2_sec = parseHMS(document.getElementById('t1t2').value);
@@ -511,11 +520,18 @@ function calculate() {
     const distAB_minus = Math.hypot(xB - xA, hB - hA);
     const timeAB_plus  = distAB_plus + ruestzeit;
     const timeAB_minus = distAB_minus + ruestzeit;
+    const timeAB_plus_Transe = Math.round(distAB_plus*speeds["Kolo"]/speeds["Transe"] + ruestzeit)
+    const timeAB_plus_FS = Math.round(distAB_plus*speeds["Kolo"]/speeds["Feuerschiff"] + ruestzeit)
+    const timeAB_plus_Bimse = Math.round(distAB_plus*speeds["Kolo"]/speeds["Bireme"] + ruestzeit)
+    
+    const timeAB_minus_Transe = Math.round(distAB_minus*speeds["Kolo"]/speeds["Transe"] + ruestzeit)
+    const timeAB_minus_FS = Math.round(distAB_minus*speeds["Kolo"]/speeds["Feuerschiff"] + ruestzeit)
+    const timeAB_minus_Bimse = Math.round(distAB_minus*speeds["Kolo"]/speeds["Bireme"] + ruestzeit)
 
     document.getElementById('dist1').textContent = 
-        ` ${nameA} ↔ ${nameB}: ${toHMS(timeAB_plus)}  (upper side)`;
+        ` ${nameA} ↔ ${nameB}: Kolo: ${toHMS(timeAB_plus)}, Transe: ${toHMS(timeAB_plus_Transe)}, FS: ${toHMS(timeAB_plus_FS)}, Bireme: ${toHMS(timeAB_plus_Bimse)} (both above the line)`;
     document.getElementById('dist2').textContent = 
-        ` ${nameA} ↔ ${nameB}: ${toHMS(timeAB_minus)} (lower side)`;
+        ` ${nameA} ↔ ${nameB}: Kolo: ${toHMS(timeAB_minus)}, Transe: ${toHMS(timeAB_minus_Transe)}, FS: ${toHMS(timeAB_minus_FS)}, Bireme: ${toHMS(timeAB_minus_Bimse)}  (one below, one above)`;
         
     document.getElementById('dist_between_ref_cities').textContent = `${t1t2_sec}`;
 
