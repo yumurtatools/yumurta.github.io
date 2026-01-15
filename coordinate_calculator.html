@@ -238,64 +238,90 @@
   </header>
 
   <div class="content">
+  
+  <!-- ── NEW: Name inputs ─────────────────────────────── -->
+  <div style="margin-bottom: 32px; padding: 20px; background: rgba(212,160,23,0.08); border-radius: 12px; border: 1px solid rgba(212,160,23,0.25);">
+    <h3 style="margin: 0 0 20px 0; color: var(--gold); font-size: 1.4rem;">Location Names</h3>
+    
+    <div class="field">
+      <label>First reference city name:</label>
+      <input type="text" id="name1" value="City 1" placeholder="e.g. Rome, Sparta, ...">
+    </div>
+    
+    <div class="field">
+      <label>Second reference city name:</label>
+      <input type="text" id="name2" value="City 2" placeholder="e.g. Athens, Troy, ...">
+    </div>
+    
+    <div class="field">
+      <label>Target location A name:</label>
+      <input type="text" id="nameA" value="City A" placeholder="e.g. Byzantium, Carthage, ...">
+    </div>
+    
+    <div class="field">
+      <label>Target location B name:</label>
+      <input type="text" id="nameB" value="City B" placeholder="e.g. Alexandria, Jerusalem, ...">
+    </div>
+  </div>
+  <!-- ───────────────────────────────────────────────────── -->
 
     <div class="egg-deco" id="egg1">🥚</div>
     <div class="egg-deco" id="egg2">✧🥚</div>
     <div class="egg-deco" id="egg3">🥚</div>
 
     <div class="field">
-      <label>Server speed (units per second):</label>
+      <label>Server speed:</label>
       <input type="number" id="speed" value="2" step="any" min="0.01">
     </div>
 
     <div class="field">
-      <label>Time 1st city → 2nd city (hh:mm:ss):</label>
-      <input type="text" id="t1t2" value="02:24:00" placeholder="hh:mm:ss">
-    </div>
+    <label>Time <span id="lblName1">City 1</span> → <span id="lblName2">City 2</span> (hh:mm:ss):</label>
+    <input type="text" id="t1t2" value="02:24:00" placeholder="hh:mm:ss">
+  </div>
 
-    <div class="field">
-      <label>Time 1st city → A (hh:mm:ss):</label>
-      <input type="text" id="t1A" value="02:24:00" placeholder="hh:mm:ss">
-    </div>
+  <div class="field">
+    <label>Time <span id="lblName1a">City 1</span> → <span id="lblNameA_a">City A</span> (hh:mm:ss for Kolo):</label>
+    <input type="text" id="t1A" value="02:24:00" placeholder="hh:mm:ss">
+  </div>
 
-    <div class="field">
-      <label>Time 2nd city → A (hh:mm:ss):</label>
-      <input type="text" id="t2A" value="03:06:00" placeholder="hh:mm:ss">
-    </div>
+  <div class="field">
+    <label>Time <span id="lblName2a">City 2</span> → <span id="lblNameA_b">City A</span> (hh:mm:ss for Kolo):</label>
+    <input type="text" id="t2A" value="03:06:00" placeholder="hh:mm:ss">
+  </div>
 
-    <div class="field">
-      <label>Time 1st city → B (hh:mm:ss):</label>
-      <input type="text" id="t1B" value="04:48:00" placeholder="hh:mm:ss">
-    </div>
+  <div class="field">
+    <label>Time <span id="lblName1b">City 1</span> → <span id="lblNameB_a">City B</span> (hh:mm:ss for Kolo):</label>
+    <input type="text" id="t1B" value="04:48:00" placeholder="hh:mm:ss">
+  </div>
 
-    <div class="field">
-      <label>Time 2nd city → B (hh:mm:ss):</label>
-      <input type="text" id="t2B" value="01:54:00" placeholder="hh:mm:ss">
-    </div>
+  <div class="field">
+    <label>Time <span id="lblName2b">City 2</span> → <span id="lblNameB_b">City B</span> (hh:mm:ss for Kolo):</label>
+    <input type="text" id="t2B" value="01:54:00" placeholder="hh:mm:ss">
+  </div>
 
     <button onclick="calculate()">Calculate positions</button>
 
-    <div class="output" id="result">
-      <div><strong>City A coordinates:</strong></div>
-      <div id="outA1" class="variant"></div>
-      <div id="outA2" class="variant"></div>
+<div class="output" id="result">
+    <div><strong><span id="outLblA">City A</span> coordinates:</strong></div>
+    <div id="outA1" class="variant"></div>
+    <div id="outA2" class="variant"></div>
 
-      <div style="margin: 32px 0 14px 0;"><strong>City B coordinates:</strong></div>
-      <div id="outB1" class="variant"></div>
-      <div id="outB2" class="variant"></div>
+    <div style="margin: 32px 0 14px 0;"><strong><span id="outLblB">City B</span> coordinates:</strong></div>
+    <div id="outB1" class="variant"></div>
+    <div id="outB2" class="variant"></div>
 
-      <div class="distance">
-        <strong>Possible travel times A ↔ B:</strong><br>
-        <div id="dist1"></div>
-        <div id="dist2"></div>
-      </div>
-
-      <div class="note">
-        First city at <strong>(0, 0)</strong><br>
-        Second city at <strong>(d, 0)</strong><br>
-        Coordinates in units = speed × (seconds − ruestzeit)
-      </div>
+    <div class="distance">
+      <strong>Possible travel times <span id="distLblA">City A</span> ↔ <span id="distLblB">City B</span>:</strong><br>
+      <div id="dist1"></div>
+      <div id="dist2"></div>
     </div>
+
+    <div class="note">
+      First city (<span id="noteName1">City 1</span>) at <strong>(0, 0)</strong><br>
+      Second city (<span id="noteName2">City 2</span>) at <strong>(d, 0)</strong><br>
+      Coordinates in units = speed × (seconds − ruestzeit)
+    </div>
+  </div>
 
     <div class="help">
       <strong>Input format examples:</strong><br>
@@ -310,6 +336,48 @@
 </div>
 
 <script>
+// Live name updating
+function updateNames() {
+  const names = {
+    n1:  document.getElementById('name1').value.trim() || 'City 1',
+    n2:  document.getElementById('name2').value.trim() || 'City 2',
+    nA:  document.getElementById('nameA').value.trim() || 'City A',
+    nB:  document.getElementById('nameB').value.trim() || 'City B'
+  };
+
+  // Input labels
+  document.getElementById('lblName1').textContent  = names.n1;
+  document.getElementById('lblName2').textContent  = names.n2;
+  document.getElementById('lblName1a').textContent = names.n1;
+  document.getElementById('lblName2a').textContent = names.n2;
+  document.getElementById('lblName1b').textContent = names.n1;
+  document.getElementById('lblName2b').textContent = names.n2;
+  
+  document.getElementById('lblNameA_a').textContent = names.nA;
+  document.getElementById('lblNameA_b').textContent = names.nA;
+  document.getElementById('lblNameB_a').textContent = names.nB;
+  document.getElementById('lblNameB_b').textContent = names.nB;
+
+  // Output labels
+  document.getElementById('outLblA').textContent  = names.nA;
+  document.getElementById('outLblB').textContent  = names.nB;
+  document.getElementById('distLblA').textContent = names.nA;
+  document.getElementById('distLblB').textContent = names.nB;
+
+  // Note at bottom
+  document.getElementById('noteName1').textContent = names.n1;
+  document.getElementById('noteName2').textContent = names.n2;
+}
+
+// Attach listeners
+['name1','name2','nameA','nameB'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateNames);
+  document.getElementById(id).addEventListener('change', updateNames);
+});
+
+// Run once on load
+window.addEventListener('DOMContentLoaded', updateNames);
+// ----------------------------------------------------------------------
 // Your original JavaScript remains 100% unchanged — just paste it here
 function parseHMS(str) { /* ... your code ... */ }
 function toHMS(totalSeconds) { /* ... */ }
