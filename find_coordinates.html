@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Target City – Position from 3 References (hh:mm:ss input)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --marble:      #f8f1e9;
+      --marble-dark:  #e8d9c5;
+      --gold:         #d4a017;
+      --gold-dark:    #b8860b;
+      --night:        #0d1b2a;
+      --deep-blue:    #1b263b;
+      --accent:       #e9c46a;
+      --text:         #2d1e12;
+      --text-light:   #5c4033;
+      --border:       #c9a87c;
+      --shadow:       rgba(0,0,0,0.25);
+      --egg-glow:     rgba(212,160,23,0.4);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(180deg, var(--night) 0%, #1a2a44 40%, #2a3b5a 100%);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 16px;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(233,196,106,0.08) 0%, transparent 8%),
+        radial-gradient(circle at 85% 75%, rgba(212,160,23,0.06) 0%, transparent 10%);
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--marble);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      box-shadow: 0 12px 48px var(--shadow),
+                  inset 0 0 0 1px rgba(212,160,23,0.15);
+      position: relative;
+    }
+
+    /* Greek key / meander subtle border pattern */
+    .container::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border: 3px solid transparent;
+      border-image: repeating-linear-gradient(45deg, var(--gold), var(--gold) 8px, transparent 8px, transparent 16px) 1;
+      pointer-events: none;
+      z-index: 1;
+      border-radius: 18px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2a1e0f 0%, #3d2a12 100%);
+      padding: 36px 32px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "✧";
+      position: absolute;
+      top: 12px; left: 20px;
+      font-size: 2.8rem;
+      color: var(--gold);
+      opacity: 0.25;
+      transform: rotate(-15deg);
+    }
+
+    header::after {
+      content: "✦";
+      position: absolute;
+      bottom: 10px; right: 24px;
+      font-size: 2.4rem;
+      color: var(--accent);
+      opacity: 0.3;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 2.1rem;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .content {
+      padding: 36px 32px 40px;
+      position: relative;
+    }
+
+    /* Decorative fantasy eggs */
+    .egg-deco {
+      position: absolute;
+      font-size: 2.4rem;
+      opacity: 0.18;
+      pointer-events: none;
+      user-select: none;
+    }
+    #egg1 { top: -10px; left: 20px; transform: rotate(-20deg); }
+    #egg2 { bottom: 60px; right: 30px; transform: rotate(15deg); font-size: 2.8rem; }
+    #egg3 { top: 180px; right: -12px; transform: rotate(-8deg); opacity: 0.22; }
+
+    .field {
+      margin: 24px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    label {
+      flex: 1 0 340px;
+      font-weight: 500;
+      color: var(--text-light);
+      font-size: 1.05rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      flex: 0 0 190px;
+      padding: 11px 16px;
+      font-size: 1.08rem;
+      font-family: 'Courier New', monospace;
+      background: rgba(255,248,235,0.75);
+      border: 1px solid #d4b37f;
+      border-radius: 10px;
+      color: #2d1e12;
+      transition: all 0.18s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px var(--egg-glow);
+      background: white;
+    }
+
+    button {
+      margin: 40px auto 20px;
+      display: block;
+      padding: 16px 56px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.22rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(90deg, #b8860b, #d4a017, #e9c46a);
+      background-size: 200% 100%;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(180,140,40,0.5);
+      transition: all 0.25s;
+    }
+
+    button:hover {
+      background-position: 100% 0;
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 12px 32px rgba(212,160,23,0.6);
+    }
+
+    .output {
+      margin-top: 36px;
+      padding: 28px;
+      background: rgba(248,241,233,0.65);
+      border: 1px solid #d4b37f;
+      border-radius: 14px;
+      backdrop-filter: blur(4px);
+      line-height: 1.7;
+      display: none;
+    }
+
+    .output strong {
+      display: inline-block;
+      width: 250px;
+      color: #8b6f47;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+    }
+
+    .variant {
+      margin: 12px 0 12px 28px;
+      padding-left: 18px;
+      border-left: 3px solid var(--gold);
+      font-family: monospace;
+      color: #3d2a12;
+    }
+
+    .distance {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px dashed #c9a87c;
+      font-weight: 600;
+      color: #a67c00;
+      font-size: 1.1rem;
+    }
+
+    .note, .help {
+      margin-top: 28px;
+      font-size: 0.96rem;
+      color: #5c4033;
+      line-height: 1.6;
+    }
+
+    .help strong {
+      color: #8b6f47;
+    }
+
+    .error {
+      color: #9b2d30;
+      font-weight: 600;
+    }
+
+    @media (max-width: 580px) {
+      .field { flex-direction: column; align-items: stretch; }
+      label, input { width: 100%; flex: none; }
+      input { margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h2>Compute Target City Position from 3 References</h2>
+  </header>
+
+  <div class="content">
+  
+  <!-- Location Names -->
+  <div style="margin-bottom: 32px; padding: 20px; background: rgba(212,160,23,0.08); border-radius: 12px; border: 1px solid rgba(212,160,23,0.25);">
+    <h3 style="margin: 0 0 20px 0; color: var(--gold); font-size: 1.4rem;">Location Names</h3>
+    
+    Provide names for the reference cities and the target.
+    <div class="field">
+      <label>First reference city name:</label>
+      <input type="text" id="name1" value="Ref 1" placeholder="e.g. Rome, Sparta, ...">
+    </div>
+    
+    <div class="field">
+      <label>Second reference city name:</label>
+      <input type="text" id="name2" value="Ref 2" placeholder="e.g. Athens, Troy, ...">
+    </div>
+    
+    <div class="field">
+      <label>Third reference city name:</label>
+      <input type="text" id="name3" value="Ref 3" placeholder="e.g. Delphi, Olympia, ...">
+    </div>
+    
+    <div class="field">
+      <label>Target city name:</label>
+      <input type="text" id="nameT" value="Target" placeholder="e.g. Byzantium, Carthage, ...">
+    </div>
+  </div>
+
+  <!-- Reference Coordinates -->
+  <div style="margin-bottom: 32px; padding: 20px; background: rgba(212,160,23,0.08); border-radius: 12px; border: 1px solid rgba(212,160,23,0.25);">
+    <h3 style="margin: 0 0 20px 0; color: var(--gold); font-size: 1.4rem;">Reference Coordinates</h3>
+    
+    Provide known coordinates for the three reference cities (in effective seconds units for Kolo).
+    
+    <div class="field">
+      <label><span id="lblName1_coord">Ref 1</span> X:</label>
+      <input type="number" id="x1" step="any" value="0">
+    </div>
+    <div class="field">
+      <label><span id="lblName1_coord_y">Ref 1</span> Y:</label>
+      <input type="number" id="y1" step="any"  value="0">
+    </div>
+    
+    <div class="field">
+      <label><span id="lblName2_coord">Ref 2</span> X:</label>
+      <input type="number" id="x2" step="any" value="22874">
+    </div>
+    <div class="field">
+      <label><span id="lblName2_coord_y">Ref 2</span> Y:</label>
+      <input type="number" id="y2" step="any"  value="0">
+    </div>
+    
+    <div class="field">
+      <label><span id="lblName3_coord">Ref 3</span> X:</label>
+      <input type="number" id="x3" step="any" value="17834">
+    </div>
+    <div class="field">
+      <label><span id="lblName3_coord_y">Ref 3</span> Y:</label>
+      <input type="number" id="y3" step="any" value="10989">
+    </div>
+  </div>
+
+    <div class="egg-deco" id="egg1">🥚</div>
+    <div class="egg-deco" id="egg2">✧🥚</div>
+    <div class="egg-deco" id="egg3">🥚</div>
+
+    <div class="field">
+      <label>Server speed:</label>
+      <input type="number" id="speed" value="2" step="any" min="0.01">
+    </div>
+
+    <div class="field">
+      <label>Time <span id="lblName1">Ref 1</span> → <span id="lblNameT_a">Target</span> (hh:mm:ss for Kolo):</label>
+      <input type="text" id="t1T" placeholder="hh:mm:ss" value="06:35:26">
+    </div>
+
+    <div class="field">
+      <label>Time <span id="lblName2">Ref 2</span> → <span id="lblNameT_b">Target</span> (hh:mm:ss for Kolo):</label>
+      <input type="text" id="t2T" placeholder="hh:mm:ss" value="04:07:13">
+    </div>
+
+    <div class="field">
+      <label>Time <span id="lblName3">Ref 3</span> → <span id="lblNameT_c">Target</span> (hh:mm:ss for Kolo):</label>
+      <input type="text" id="t3T" placeholder="hh:mm:ss" value="00:57:49">
+    </div>
+
+    <button onclick="calculate()">Calculate position</button>
+
+<div class="output" id="result">
+    <div><strong><span id="outLblT">Target</span> coordinates:</strong></div>
+    <div id="outT1" class="variant"></div>
+    <div id="outT2" class="variant"></div>
+
+    <div class="note">
+      Reference cities:<br>
+      <span id="noteName1">Ref 1</span> at <strong>(<span id="noteX1"></span>, <span id="noteY1"></span>)</strong><br>
+      <span id="noteName2">Ref 2</span> at <strong>(<span id="noteX2"></span>, <span id="noteY2"></span>)</strong><br>
+      <span id="noteName3">Ref 3</span> at <strong>(<span id="noteX3"></span>, <span id="noteY3"></span>)</strong><br>
+      Coordinates in units = seconds − Ruestzeit for Kolo
+    </div>
+  </div>
+
+    <div class="help">
+      <strong>Input format examples:</strong><br>
+      • 02:30:45<br>
+      • 1:15:00<br>
+      • 45:30<br>
+      • 0:03:12.5<br>
+      • 3661 (treated as seconds)
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Live name updating
+function updateNames() {
+  const names = {
+    n1:  document.getElementById('name1').value.trim() || 'Ref 1',
+    n2:  document.getElementById('name2').value.trim() || 'Ref 2',
+    n3:  document.getElementById('name3').value.trim() || 'Ref 3',
+    nT:  document.getElementById('nameT').value.trim() || 'Target'
+  };
+
+  // Input labels
+  document.getElementById('lblName1').textContent  = names.n1;
+  document.getElementById('lblName2').textContent  = names.n2;
+  document.getElementById('lblName3').textContent  = names.n3;
+  
+  document.getElementById('lblName1_coord').textContent = names.n1;
+  document.getElementById('lblName1_coord_y').textContent = names.n1;
+  document.getElementById('lblName2_coord').textContent = names.n2;
+  document.getElementById('lblName2_coord_y').textContent = names.n2;
+  document.getElementById('lblName3_coord').textContent = names.n3;
+  document.getElementById('lblName3_coord_y').textContent = names.n3;
+  
+  document.getElementById('lblNameT_a').textContent = names.nT;
+  document.getElementById('lblNameT_b').textContent = names.nT;
+  document.getElementById('lblNameT_c').textContent = names.nT;
+
+  // Output labels
+  document.getElementById('outLblT').textContent  = names.nT;
+
+  // Note at bottom
+  document.getElementById('noteName1').textContent = names.n1;
+  document.getElementById('noteName2').textContent = names.n2;
+  document.getElementById('noteName3').textContent = names.n3;
+}
+
+// Attach listeners
+['name1','name2','name3','nameT'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateNames);
+  document.getElementById(id).addEventListener('change', updateNames);
+});
+
+// Run once on load
+window.addEventListener('DOMContentLoaded', updateNames);
+
+// Parse HMS function (unchanged)
+function parseHMS(input) {
+    if (!input || typeof input !== 'string') return NaN;
+
+    // Remove whitespace
+    input = input.trim();
+
+    // Case 1: already just seconds (e.g. "3661" or "45.5")
+    if (/^[\d.]+$/.test(input)) {
+        const num = parseFloat(input);
+        return isNaN(num) ? NaN : num;
+    }
+
+    // Case 2: hh:mm:ss or h:mm:ss or mm:ss or h:mm or even just mm
+    // Allowed separators: : or .
+    const parts = input.split(/[:.]/).map(p => p.trim());
+
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+
+    if (parts.length === 1) {
+        // just seconds (already handled above)
+        return parseFloat(parts[0]);
+    }
+    else if (parts.length === 2) {
+        // mm:ss
+        minutes = parseInt(parts[0], 10) || 0;
+        seconds = parseFloat(parts[1]) || 0;
+    }
+    else if (parts.length === 3) {
+        // hh:mm:ss
+        hours   = parseInt(parts[0], 10) || 0;
+        minutes = parseInt(parts[1], 10) || 0;
+        seconds = parseFloat(parts[2]) || 0;
+    }
+    else {
+        return NaN;
+    }
+
+    if (minutes > 59 || seconds >= 60 || hours < 0 || minutes < 0 || seconds < 0) {
+        return NaN;
+    }
+
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+// toHMS function (unchanged)
+function toHMS(totalSeconds) {
+    if (typeof totalSeconds !== 'number' || isNaN(totalSeconds) || totalSeconds < 0) {
+        return "—";
+    }
+
+    const hours   = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    // Format with leading zeros
+    const h = String(hours).padStart(2, '0');
+    const m = String(minutes).padStart(2, '0');
+    const s = seconds.toFixed(1).replace(/\.0$/, '');  // remove .0 if integer
+
+    if (hours > 0) {
+        return `${h}:${m}:${s.padStart(2, '0')}`;
+    } else if (minutes > 0 || seconds >= 1) {
+        return `${m}:${s.padStart(2, '0')}`;
+    } else {
+        return s;
+    }
+}
+
+// Circle intersection helper
+function circleIntersection(c1x, c1y, r1, c2x, c2y, r2) {
+  const dx = c2x - c1x;
+  const dy = c2y - c1y;
+  const d = Math.hypot(dx, dy);
+
+  if (d > r1 + r2 || d < Math.abs(r1 - r2)) {
+    return [];
+  }
+
+  if (d === 0 && r1 === r2) {
+    return []; // coincident, infinite points
+  }
+
+  const a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+  const h = Math.sqrt(r1 * r1 - a * a);
+
+  const xm = c1x + a * dx / d;
+  const ym = c1y + a * dy / d;
+
+  const xs1 = xm + h * dy / d;
+  const ys1 = ym - h * dx / d;
+  const xs2 = xm - h * dy / d;
+  const ys2 = ym + h * dx / d;
+
+  const points = [[xs1, ys1]];
+  if (h > 0) { // if h==0, tangent, one point
+    points.push([xs2, ys2]);
+  }
+  return points;
+}
+
+function calculate() {
+  const speed = parseFloat(document.getElementById('speed').value);
+  const ruestzeit = 900 / speed;
+
+  const speeds = {
+    "Bireme": 45,
+    "Transe": 24,
+    "Tireme": 45,
+    "Kolo": 9,
+    "Feuerschiff": 39,
+    "Brander": 15
+  };
+
+  // Parse coordinates
+  const x1 = parseFloat(document.getElementById('x1').value);
+  const y1 = parseFloat(document.getElementById('y1').value);
+  const x2 = parseFloat(document.getElementById('x2').value);
+  const y2 = parseFloat(document.getElementById('y2').value);
+  const x3 = parseFloat(document.getElementById('x3').value);
+  const y3 = parseFloat(document.getElementById('y3').value);
+
+  // Parse travel times
+  const t1T_sec = parseHMS(document.getElementById('t1T').value);
+  const t2T_sec = parseHMS(document.getElementById('t2T').value);
+  const t3T_sec = parseHMS(document.getElementById('t3T').value);
+
+  // Effective distances (in Kolo time units)
+  const d1 = t1T_sec - ruestzeit;
+  const d2 = t2T_sec - ruestzeit;
+  const d3 = t3T_sec - ruestzeit;
+
+  // Check for invalid inputs
+  //if (isNaN(speed) || isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2) || isNaN(x3) || isNaN(y3) ||
+  //    isNaN(d1) || isNaN(d2) || isNaN(d3) || d1 < 0 || d2 < 0 || d3 < 0) {
+  //  document.getElementById('outT1').textContent = 'Invalid input. Please check values.';
+  //  document.getElementById('outT2').textContent = '';
+  //  document.getElementById('result').style.display = 'block';
+  //  return;
+  //}
+
+  // Compute possible intersections of circle 1 and 2
+  const intersections = circleIntersection(x1, y1, d1, x2, y2, d2);
+
+  // Find which intersect with circle 3 (tolerance 1 unit for floating point errors)
+  const possiblePoints = [];
+  const tolerance = 100;
+
+  intersections.forEach(([px, py]) => {
+    const distTo3 = Math.hypot(px - x3, py - y3);
+    if (Math.abs(distTo3 - d3) <= tolerance) {
+      possiblePoints.push([px, py]);
+    }
+  });
+
+  // Output
+  const nameT = document.getElementById('nameT').value.trim() || "Target";
+
+  if (possiblePoints.length === 0) {
+    document.getElementById('outT1').textContent = `${nameT}: No intersection found. Check inputs or increase tolerance.`;
+    document.getElementById('outT2').textContent = '';
+  } else {
+    document.getElementById('outT1').textContent = `${nameT}: (${possiblePoints[0][0].toFixed(1)}, ${possiblePoints[0][1].toFixed(1)})`;
+    if (possiblePoints.length > 1) {
+      document.getElementById('outT2').textContent = `${nameT}: (${possiblePoints[1][0].toFixed(1)}, ${possiblePoints[1][1].toFixed(1)}) (alternative)`;
+    } else {
+      document.getElementById('outT2').textContent = '';
+    }
+  }
+
+  // Update notes with coordinates
+  document.getElementById('noteX1').textContent = x1.toFixed(1);
+  document.getElementById('noteY1').textContent = y1.toFixed(1);
+  document.getElementById('noteX2').textContent = x2.toFixed(1);
+  document.getElementById('noteY2').textContent = y2.toFixed(1);
+  document.getElementById('noteX3').textContent = x3.toFixed(1);
+  document.getElementById('noteY3').textContent = y3.toFixed(1);
+
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
