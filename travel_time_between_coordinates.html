@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Travel Time Between Two Known Cities</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap">
+  <style>
+    :root {
+      --marble:      #f8f1e9;
+      --gold:         #d4a017;
+      --gold-dark:    #b8860b;
+      --night:        #0d1b2a;
+      --accent:       #e9c46a;
+      --text:         #2d1e12;
+      --text-light:   #5c4033;
+      --border:       #c9a87c;
+      --shadow:       rgba(0,0,0,0.25);
+      --egg-glow:     rgba(212,160,23,0.4);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(180deg, var(--night) 0%, #1a2a44 40%, #2a3b5a 100%);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      background: var(--marble);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      box-shadow: 0 12px 48px var(--shadow);
+      position: relative;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2a1e0f 0%, #3d2a12 100%);
+      padding: 32px 24px 24px;
+      text-align: center;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      font-size: 2rem;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .content {
+      padding: 32px 24px 40px;
+    }
+
+    .field {
+      margin: 20px 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    label {
+      flex: 1 0 280px;
+      font-weight: 500;
+      color: var(--text-light);
+      font-size: 1.05rem;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      flex: 0 0 180px;
+      padding: 10px 14px;
+      font-size: 1.05rem;
+      font-family: 'Courier New', monospace;
+      background: rgba(255,248,235,0.8);
+      border: 1px solid #d4b37f;
+      border-radius: 8px;
+      color: #2d1e12;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px var(--egg-glow);
+      background: white;
+    }
+
+    button {
+      margin: 36px auto 16px;
+      display: block;
+      padding: 14px 52px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.18rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(90deg, #b8860b, #d4a017, #e9c46a);
+      background-size: 200% 100%;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 18px rgba(180,140,40,0.5);
+      transition: all 0.22s;
+    }
+
+    button:hover {
+      background-position: 100% 0;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(212,160,23,0.6);
+    }
+
+    .output {
+      margin-top: 32px;
+      padding: 24px;
+      background: rgba(248,241,233,0.7);
+      border: 1px solid #d4b37f;
+      border-radius: 12px;
+      display: none;
+      line-height: 1.65;
+    }
+
+    .output strong {
+      color: #8b6f47;
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      display: inline-block;
+      width: 160px;
+    }
+
+    .travel-line {
+      margin: 10px 0;
+      font-family: monospace;
+      color: #3d2a12;
+    }
+
+    .note {
+      margin-top: 28px;
+      font-size: 0.95rem;
+      color: #5c4033;
+    }
+
+    .error {
+      color: #9b2d30;
+      font-weight: 600;
+    }
+
+    @media (max-width: 580px) {
+      .field { flex-direction: column; align-items: stretch; }
+      label, input { width: 100%; flex: none; }
+      input { margin-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h2>Travel Time Between Two Cities</h2>
+  </header>
+
+  <div class="content">
+
+    <div class="field">
+      <label>Server speed:</label>
+      <input type="number" id="speed" value="2" step="any" min="0.01">
+    </div>
+
+    <div style="margin: 32px 0 16px; color: #8b6f47; font-weight: 600;">
+      City 1 coordinates (in Kolo units)
+    </div>
+
+    <div class="field">
+      <label>City 1 — X:</label>
+      <input type="number" id="x1" step="any" value="17834.2">
+    </div>
+    <div class="field">
+      <label>City 1 — Y:</label>
+      <input type="number" id="y1" step="any" value="10989.0">
+    </div>
+
+    <div style="margin: 32px 0 16px; color: #8b6f47; font-weight: 600;">
+      City 2 coordinates (in Kolo units)
+    </div>
+
+    <div class="field">
+      <label>City 2 — X:</label>
+      <input type="number" id="x2" step="any" value="18757.6">
+    </div>
+    <div class="field">
+      <label>City 2 — Y:</label>
+      <input type="number" id="y2" step="any" value="13781.4">
+    </div>
+
+    <button onclick="calculate()">Calculate Travel Times</button>
+
+    <div class="output" id="result">
+      <div><strong>Distance:</strong> <span id="distValue">—</span> units</div>
+      <div class="travel-line"><strong>Kolo:</strong> <span id="koloTime">—</span></div>
+      <div class="travel-line"><strong>Transport:</strong> <span id="transTime">—</span></div>
+      <div class="travel-line"><strong>Bireme / Trireme:</strong> <span id="biremeTime">—</span></div>
+      <div class="travel-line"><strong>Fireship:</strong> <span id="fsTime">—</span></div>
+      <div class="travel-line"><strong>Ram:</strong> <span id="ramTime">—</span></div>
+
+      <div class="note">
+        Times include Rüstzeit (preparation time).<br>
+        Coordinates are in <strong>effective seconds</strong> at Kolo speed (Kolo base).
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function toHMS(seconds) {
+  if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) return "—";
+
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.round(seconds % 60); // round to whole seconds for travel times
+
+  if (h > 0) {
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else if (m > 0) {
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  } else {
+    return String(s);
+  }
+}
+
+function calculate() {
+  const speed = parseFloat(document.getElementById('speed').value) || 1;
+
+  const x1 = parseFloat(document.getElementById('x1').value) || 0;
+  const y1 = parseFloat(document.getElementById('y1').value) || 0;
+  const x2 = parseFloat(document.getElementById('x2').value) || 0;
+  const y2 = parseFloat(document.getElementById('y2').value) || 0;
+
+  const ruestzeit = 900 / speed;
+
+  // Base speeds (at speed = 1)
+  const baseSpeeds = {
+    kolo:     9,
+    transport:24,
+    bireme:   45,
+    fs:       39,
+    brander:      15
+  };
+
+  // Distance in Kolo units
+  const dist = Math.hypot(x2 - x1, y2 - y1);
+
+  // Time in seconds at speed=1 for each unit
+  const realTimes = {};
+  for (let unit in baseSpeeds) {
+    realTimes[unit] = dist * baseSpeeds["kolo"] / baseSpeeds[unit] + ruestzeit;
+  }
+
+  // Output
+  document.getElementById('distValue').textContent = dist.toFixed(1);
+
+  document.getElementById('koloTime').textContent    = toHMS(realTimes.kolo);
+  document.getElementById('transTime').textContent   = toHMS(realTimes.transport);
+  document.getElementById('biremeTime').textContent  = toHMS(realTimes.bireme);
+  document.getElementById('fsTime').textContent      = toHMS(realTimes.fs);
+  document.getElementById('ramTime').textContent     = toHMS(realTimes.ram);
+
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+</body>
+</html>

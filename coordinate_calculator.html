@@ -504,11 +504,11 @@ function calculate() {
     const nameA = document.getElementById('nameA').value.trim() || "City A";
     const nameB = document.getElementById('nameB').value.trim() || "City B";
 
-    document.getElementById('outA1').textContent = `${nameA}:  (${xA.toFixed(1)},  ${yA_plus.toFixed(1)})`;
-    document.getElementById('outA2').textContent = `${nameA}:  (${xA.toFixed(1)}, ${yA_minus.toFixed(1)})`;
+    document.getElementById('outA1').textContent = `${nameA}:  (${xA.toFixed(4)},  ${yA_plus.toFixed(4)})`;
+    document.getElementById('outA2').textContent = `${nameA}:  (${xA.toFixed(4)}, ${yA_minus.toFixed(4)})`;
 
-    document.getElementById('outB1').textContent = `${nameB}:  (${xB.toFixed(1)},  ${yB_plus.toFixed(1)})`;
-    document.getElementById('outB2').textContent = `${nameB}:  (${xB.toFixed(1)}, ${yB_minus.toFixed(1)})`;
+    document.getElementById('outB1').textContent = `${nameB}:  (${xB.toFixed(4)},  ${yB_plus.toFixed(4)})`;
+    document.getElementById('outB2').textContent = `${nameB}:  (${xB.toFixed(4)}, ${yB_minus.toFixed(4)})`;
 
     // Optional: show distance between ref cities
     document.getElementById('dist1').textContent = 
