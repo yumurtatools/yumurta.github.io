@@ -154,6 +154,9 @@
             <p>Fern (total): <span id="total_def_fern">0</span></p> 
 	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_fern">0</span></p>
 	    <p>Min. Kosten fuer Angreifer (Zeit): <span id="min_cost_att_fern_time">0</span></p>
+	          <p>Kosten fuer Verteidigung:</p> 
+	    <p>Ressourcen: <span id="cost_def_all">0</span></p>
+	    <p>Zeit: <span id="cost_def_all_time">0</span></p>
         </div>
 
         <button onclick="calculateLosses()">Simulate</button>
@@ -342,6 +345,14 @@
             document.getElementById('min_cost_att_schlag_time').textContent = secondsToTime(benoetigteReiter * units.reiter.cost.time);
             document.getElementById('min_cost_att_stich_time').textContent = secondsToTime(Math.min(benoetigteHopliten * units.hopliten_def.cost.time, benoetigteStreitwagen * units.streitwagen.cost.time));
             document.getElementById('min_cost_att_fern_time').textContent = secondsToTime(benoetigteSchleuderer * units.schleuderer.cost.time);
+            
+            const def_stein = defSchwert * units.schwert.cost.stein + defHopliten * units.hopliten_def.cost.stein + defBogen * units.bogen.cost.stein;
+            const def_holz = defSchwert * units.schwert.cost.holz + defHopliten * units.hopliten_def.cost.holz + defBogen * units.bogen.cost.holz;
+            const def_silber = defSchwert * units.schwert.cost.silber + defHopliten * units.hopliten_def.cost.silber + defBogen * units.bogen.cost.silber;
+            const def_total_res = def_stein + def_holz + def_silber;
+            const def_total_time = defSchwert * units.schwert.cost.time + defHopliten * units.hopliten_def.cost.time + defBogen * units.bogen.cost.time;
+            document.getElementById('cost_def_all').textContent = def_total_res;
+            document.getElementById('cost_def_all_time').textContent = secondsToTime(def_total_time);
         }
     </script>
 </body>
