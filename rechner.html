@@ -147,10 +147,13 @@
             <label>Mauer: <input type="number" id="mauer" min="0" max="20" value="0"></label>
             <p>Schlag (total): <span id="total_def_schlag">0</span></p> 
 	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_schlag">0</span></p>
+	    <p>Min. Kosten fuer Angreifer (Zeit): <span id="min_cost_att_schlag_time">0</span></p>
             <p>Stich (total): <span id="total_def_stich">0</span></p> 
 	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_stich">0</span></p>
+	    <p>Min. Kosten fuer Angreifer (Zeit): <span id="min_cost_att_stich_time">0</span></p>
             <p>Fern (total): <span id="total_def_fern">0</span></p> 
 	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_fern">0</span></p>
+	    <p>Min. Kosten fuer Angreifer (Zeit): <span id="min_cost_att_fern_time">0</span></p>
         </div>
 
         <button onclick="calculateLosses()">Simulate</button>
@@ -335,6 +338,10 @@
             document.getElementById('min_cost_att_schlag').textContent = Math.round(defSchlag * ressourcen4schlag) + " = Reiter "+benoetigteReiter;
             document.getElementById('min_cost_att_stich').textContent = Math.round(defStich * ressourcen4stich) + " = Hopliten  "+benoetigteHopliten + " = Streitwagen "+benoetigteStreitwagen;
             document.getElementById('min_cost_att_fern').textContent = Math.round(defFern * ressourcen4fern) + " = Schleuderer "+benoetigteSchleuderer;
+            
+            document.getElementById('min_cost_att_schlag_time').textContent = secondsToTime(benoetigteReiter * units.reiter.cost.time);
+            document.getElementById('min_cost_att_stich_time').textContent = secondsToTime(Math.min(benoetigteHopliten * units.hopliten_def.cost.time, benoetigteStreitwagen * units.streitwagen.cost.time));
+            document.getElementById('min_cost_att_fern_time').textContent = secondsToTime(benoetigteSchleuderer * units.schleuderer.cost.time);
         }
     </script>
 </body>
