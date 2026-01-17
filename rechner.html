@@ -154,8 +154,11 @@
             <p>Fern (total): <span id="total_def_fern">0</span></p> 
 	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_fern">0</span></p>
 	    <p>Min. Kosten fuer Angreifer (Zeit): <span id="min_cost_att_fern_time">0</span></p>
-	          <p>Kosten fuer Verteidigung:</p> 
+	          <p><u>Kosten fuer Verteidigung:</u></p> 
 	    <p>Ressourcen: <span id="cost_def_all">0</span></p>
+	    <p>Holz: <span id="cost_def_holz">0</span></p>
+	    <p>Stein: <span id="cost_def_stein">0</span></p>
+	    <p>Silber: <span id="cost_def_silber">0</span></p>
 	    <p>Zeit: <span id="cost_def_all_time">0</span></p>
         </div>
 
@@ -333,11 +336,6 @@
             document.getElementById('insgesamt_off_loss').textContent = off_loss_total;
             document.getElementById('zeit_off_loss').textContent = secondsToTime(off_loss_time);
 
-            //benoetigteHopliten;
-            //benoetigteHopliten;
-            //benoetigteReiter;
-            //benoetigteSchleuderer;
-
             document.getElementById('min_cost_att_schlag').textContent = Math.round(defSchlag * ressourcen4schlag) + " = Reiter "+benoetigteReiter;
             document.getElementById('min_cost_att_stich').textContent = Math.round(defStich * ressourcen4stich) + " = Hopliten  "+benoetigteHopliten + " = Streitwagen "+benoetigteStreitwagen;
             document.getElementById('min_cost_att_fern').textContent = Math.round(defFern * ressourcen4fern) + " = Schleuderer "+benoetigteSchleuderer;
@@ -353,6 +351,9 @@
             const def_total_time = defSchwert * units.schwert.cost.time + defHopliten * units.hopliten_def.cost.time + defBogen * units.bogen.cost.time;
             document.getElementById('cost_def_all').textContent = def_total_res;
             document.getElementById('cost_def_all_time').textContent = secondsToTime(def_total_time);
+            document.getElementById('cost_def_holz').textContent = def_holz;
+            document.getElementById('cost_def_stein').textContent = def_stein;
+            document.getElementById('cost_def_silber').textContent = def_silber;
         }
     </script>
 </body>
