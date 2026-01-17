@@ -165,16 +165,18 @@
         // => Streitwagen sind kosteneffizienter
         const cost_b4fern = cost_b_schleuderer/23;
         
-        // Alle Werte bei Kaserne 5 in sek. (aber egal, so lange das Verhaeltnis der Einheiten gleich ist)
-        const cost_time_reiter = 33*60+53;
-        const cost_time_hoplit = 10*60+49;
-        const cost_time_streitwagen = 45*60+11;
-        const cost_time_schleuderer = 9*60+25;
-        const cost_time_schwert = 7*60+44;
-        const cost_time_bogen = 8*60+9;
+        // Alle Werte bei Kaserne 15 in sek. (aber egal, so lange das Verhaeltnis der Einheiten gleich ist)
+        const cost_time_reiter = 26*60+30;
+        const cost_time_hoplit = 8*60+28;
+        const cost_time_streitwagen = 35*60+20;
+        const cost_time_schleuderer = 7*60+22;
+        const cost_time_schwert = 6*60+37;
+        const cost_time_bogen = 6*60+59;
         
         const cost_time4schlag = cost_time_reiter/60;
-        const cost_time4stich = cost_time_hoplit/16; // = 40.56
+        const cost_time4stich_hoplit = cost_time_hoplit/16;
+        const cost_time4stich_streitwagen = cost_time_streitwagen/56;
+        const cost_time4stich = Math.min(cost_time4stich_hoplit, cost_time4stich_streitwagen); // = 40.56
         // const cost_time4stich = cost_time_streitwagen/56; // = 48.41
         const cost_time4fern = cost_time_schleuderer/23;
         
