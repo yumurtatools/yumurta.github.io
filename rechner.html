@@ -316,10 +316,6 @@
             document.getElementById('total_att_schlag').textContent = attSchlag;
             document.getElementById('total_att_stich').textContent = attStich;
             document.getElementById('total_att_fern').textContent = attFern;
-
-            // const defSchlag = (defSchwert * units.schwert.defense.schlag + defHopliten * units.hopliten_def.defense.schlag + defBogen * units.bogen.defense.schlag + defMiliz * units.miliz.defense.schlag)*mauer_factor;
-            // const defStich = (defSchwert * units.schwert.defense.stich + defHopliten * units.hopliten_def.defense.stich + defBogen * units.bogen.defense.stich + defMiliz * units.miliz.defense.stich)*mauer_factor;
-            // const defFern = (defSchwert * units.schwert.defense.fern + defHopliten * units.hopliten_def.defense.fern + defBogen * units.bogen.defense.fern  + defMiliz * units.miliz.defense.fern)*mauer_factor;
             
             const defSchlag = calculate_defSchlag(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor);
             const defStich = calculate_defStich(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor);
