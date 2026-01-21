@@ -189,6 +189,33 @@
     </div>
 
     <script>
+        // data
+        // Zeit bei Kaserne 15
+        const units = {
+            reiter: { attack: { type: 'Schlag', value: 60 }, defense: { schlag: 18, stich: 1, fern: 24 },
+            cost: { holz:240, stein:120, silber:360, gunst:0, einheitenplaetze:3, time:26*60+30} },
+            
+            hopliten_att: { attack: { type: 'Stich', value: 16 }, defense: { schlag: 18, stich: 12, fern: 7 }, 
+            cost: { holz:0, stein:75, silber:150, gunst:0, einheitenplaetze:1, time:8*60+28} },
+            
+            streitwagen: { attack: { type: 'Stich', value: 56 }, defense: { schlag: 76, stich: 16, fern: 56 }, 
+            cost: { holz:200, stein:440, silber:320, gunst:0, einheitenplaetze:4, time:35*60+20} },
+            
+            schleuderer: { attack: { type: 'Fern', value: 23 }, defense: { schlag: 7, stich: 8, fern: 2 }, 
+            cost: { holz:55, stein:100, silber:40, gunst:0, einheitenplaetze:1, time:7*60+22} },
+            
+            schwert: { attack: { type: 'Schlag', value: 5 }, defense: { schlag: 14, stich: 8, fern: 30 }, 
+            cost: { holz:95, stein:0, silber:85, gunst:0, einheitenplaetze:1, time:6*60+37} },
+            
+            hopliten_def: { attack: { type: 'Stich', value: 16 }, defense: { schlag: 18, stich: 12, fern: 7 }, 
+            cost: { holz:0, stein:75, silber:150, gunst:0, einheitenplaetze:1, time:8*60+28} },
+            
+            bogen: { attack: { type: 'Fern', value: 8 }, defense: { schlag: 7, stich: 25, fern: 13 }, 
+            cost: { holz:120, stein:0, silber:75, gunst:0, einheitenplaetze:1, time:6*60+59} },
+
+            miliz: { attack: { type: 'Fern', value: 0 }, defense: { schlag: 6, stich: 8, fern: 4 }, 
+            cost: { holz:0, stein:0, silber:0, gunst:0, einheitenplaetze:0, time:0} }
+        };
         //helper functions
         function secondsToTime(totalSeconds) {
             let secs = totalSeconds; // % 86400;
@@ -198,6 +225,18 @@
             const s = (secs % 60).toString().padStart(2, '0');
             return `${h}:${m}:${s}`;
         }
+        
+            function calculate_defSchlag(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor) {
+                return (defSchwert * units.schwert.defense.schlag + defHopliten * units.hopliten_def.defense.schlag + defBogen * units.bogen.defense.schlag + defMiliz * units.miliz.defense.schlag)*mauer_factor;
+            }
+            
+            function calculate_defStich(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor) {
+                return (defSchwert * units.schwert.defense.stich + defHopliten * units.hopliten_def.defense.stich + defBogen * units.bogen.defense.stich + defMiliz * units.miliz.defense.stich)*mauer_factor;
+            }
+            
+            function calculate_defFern(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor) {
+                return (defSchwert * units.schwert.defense.fern + defHopliten * units.hopliten_def.defense.fern + defBogen * units.bogen.defense.fern  + defMiliz * units.miliz.defense.fern)*mauer_factor;
+            }
         
         function calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert,
             defBogen, defHopliten, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer) {
@@ -249,32 +288,7 @@
             }
         //end helper functions
 
-        // Zeit bei Kaserne 15
-        const units = {
-            reiter: { attack: { type: 'Schlag', value: 60 }, defense: { schlag: 18, stich: 1, fern: 24 },
-            cost: { holz:240, stein:120, silber:360, gunst:0, einheitenplaetze:3, time:26*60+30} },
-            
-            hopliten_att: { attack: { type: 'Stich', value: 16 }, defense: { schlag: 18, stich: 12, fern: 7 }, 
-            cost: { holz:0, stein:75, silber:150, gunst:0, einheitenplaetze:1, time:8*60+28} },
-            
-            streitwagen: { attack: { type: 'Stich', value: 56 }, defense: { schlag: 76, stich: 16, fern: 56 }, 
-            cost: { holz:200, stein:440, silber:320, gunst:0, einheitenplaetze:4, time:35*60+20} },
-            
-            schleuderer: { attack: { type: 'Fern', value: 23 }, defense: { schlag: 7, stich: 8, fern: 2 }, 
-            cost: { holz:55, stein:100, silber:40, gunst:0, einheitenplaetze:1, time:7*60+22} },
-            
-            schwert: { attack: { type: 'Schlag', value: 5 }, defense: { schlag: 14, stich: 8, fern: 30 }, 
-            cost: { holz:95, stein:0, silber:85, gunst:0, einheitenplaetze:1, time:6*60+37} },
-            
-            hopliten_def: { attack: { type: 'Stich', value: 16 }, defense: { schlag: 18, stich: 12, fern: 7 }, 
-            cost: { holz:0, stein:75, silber:150, gunst:0, einheitenplaetze:1, time:8*60+28} },
-            
-            bogen: { attack: { type: 'Fern', value: 8 }, defense: { schlag: 7, stich: 25, fern: 13 }, 
-            cost: { holz:120, stein:0, silber:75, gunst:0, einheitenplaetze:1, time:6*60+59} },
 
-            miliz: { attack: { type: 'Fern', value: 0 }, defense: { schlag: 6, stich: 8, fern: 4 }, 
-            cost: { holz:0, stein:0, silber:0, gunst:0, einheitenplaetze:0, time:0} }
-        };
         let mauerdef = [0, 3.7, 7.5, 11.4, 15.5, 19.7, 24.1, 28.5, 33.3, 38.0, 43.0, 48.1, 53.5, 59.0, 64.7, 70.5, 76.7, 82.9, 89.5, 96.2, 103.3, 110.4,, 117.9, 125.6, 133.6, 141.9];
         function calculateLosses() {
             const attReiter = parseInt(document.getElementById('att_reiter').value) || 0;
@@ -290,11 +304,11 @@
             const mauer_factor = 1 + mauerdef[mauer]/100;
 
             // how much cost one attacking point
-	    const ressourcen4stich4hoplit = (units.hopliten_att.cost.stein + units.hopliten_att.cost.holz + units.hopliten_att.cost.silber)/units.hopliten_att.attack.value;
-	    const ressourcen4stich4streitwagen = (units.streitwagen.cost.stein + units.streitwagen.cost.holz + units.streitwagen.cost.silber)/units.streitwagen.attack.value;
-	    const ressourcen4stich = Math.min(ressourcen4stich4hoplit, ressourcen4stich4streitwagen);
-	    const ressourcen4schlag = (units.reiter.cost.stein + units.reiter.cost.holz + units.reiter.cost.silber)/units.reiter.attack.value;
-	    const ressourcen4fern = (units.schleuderer.cost.stein + units.schleuderer.cost.holz + units.schleuderer.cost.silber)/units.schleuderer.attack.value;         
+	          const ressourcen4stich4hoplit = (units.hopliten_att.cost.stein + units.hopliten_att.cost.holz + units.hopliten_att.cost.silber)/units.hopliten_att.attack.value;
+	          const ressourcen4stich4streitwagen = (units.streitwagen.cost.stein + units.streitwagen.cost.holz + units.streitwagen.cost.silber)/units.streitwagen.attack.value;
+	          const ressourcen4stich = Math.min(ressourcen4stich4hoplit, ressourcen4stich4streitwagen);
+	          const ressourcen4schlag = (units.reiter.cost.stein + units.reiter.cost.holz + units.reiter.cost.silber)/units.reiter.attack.value;
+	          const ressourcen4fern = (units.schleuderer.cost.stein + units.schleuderer.cost.holz + units.schleuderer.cost.silber)/units.schleuderer.attack.value;         
 
             const attSchlag = attReiter * units.reiter.attack.value;
             const attStich = attHopliten * units.hopliten_att.attack.value + attStreitwagen * units.streitwagen.attack.value;
@@ -303,9 +317,13 @@
             document.getElementById('total_att_stich').textContent = attStich;
             document.getElementById('total_att_fern').textContent = attFern;
 
-            const defSchlag = (defSchwert * units.schwert.defense.schlag + defHopliten * units.hopliten_def.defense.schlag + defBogen * units.bogen.defense.schlag + defMiliz * units.miliz.defense.schlag)*mauer_factor;
-            const defStich = (defSchwert * units.schwert.defense.stich + defHopliten * units.hopliten_def.defense.stich + defBogen * units.bogen.defense.stich + defMiliz * units.miliz.defense.stich)*mauer_factor;
-            const defFern = (defSchwert * units.schwert.defense.fern + defHopliten * units.hopliten_def.defense.fern + defBogen * units.bogen.defense.fern  + defMiliz * units.miliz.defense.fern)*mauer_factor;
+            // const defSchlag = (defSchwert * units.schwert.defense.schlag + defHopliten * units.hopliten_def.defense.schlag + defBogen * units.bogen.defense.schlag + defMiliz * units.miliz.defense.schlag)*mauer_factor;
+            // const defStich = (defSchwert * units.schwert.defense.stich + defHopliten * units.hopliten_def.defense.stich + defBogen * units.bogen.defense.stich + defMiliz * units.miliz.defense.stich)*mauer_factor;
+            // const defFern = (defSchwert * units.schwert.defense.fern + defHopliten * units.hopliten_def.defense.fern + defBogen * units.bogen.defense.fern  + defMiliz * units.miliz.defense.fern)*mauer_factor;
+            
+            const defSchlag = calculate_defSchlag(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor);
+            const defStich = calculate_defStich(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor);
+            const defFern = calculate_defFern(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor);
             document.getElementById('total_def_schlag').textContent = defSchlag;
             document.getElementById('total_def_stich').textContent = defStich;
             document.getElementById('total_def_fern').textContent = defFern;
