@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ancient Greek Battle Simulator</title>
+    <title>Yumurta's Battle Simulator</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -121,7 +121,7 @@
             <img src="https://upload.wikimedia.org/wikipedia/commons/d/d9/Zeus_Typhon_Staatliche_Antikensammlungen_596.jpg" alt="Typhon, the Mighty Serpent">
             <img src="https://paleothea.com/wp-content/uploads/images/ladon-guarding-golden-apples.jpeg" alt="Ladon Guarding the Golden Apples">
         </div>
-        <h1>Battle Simulator</h1>
+        <h1>Yumurta's Battle Simulator</h1>
         <p class="subtitle">Battle Simulator for Grepolis</p>
 
         <img src="https://www.worldhistory.org/img/r/p/750x750/17715.jpg?v=1691488428-1691489327" alt="Typhon Guardian" class="guardian left-guardian">
@@ -198,6 +198,55 @@
             const s = (secs % 60).toString().padStart(2, '0');
             return `${h}:${m}:${s}`;
         }
+        
+        function calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert,
+            defBogen, defHopliten, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer) {
+            // -------------
+            let loss_def_schwert = 0;
+            let loss_def_bogen = 0;
+            let loss_def_hoplit = 0;
+            let loss_off_reiter = 0;
+            let loss_off_hopliten = 0;
+            let loss_off_streitwagen = 0;
+            let loss_off_schleuderer = 0;
+
+            if (attSchlag > 0) {
+                const rate_loss_off = Math.min((proportion_schlag_off * defSchlag + 10 + 10*mauer) / attSchlag, 1) ** 1.2;
+                const rate_loss_def = Math.min(attSchlag / (proportion_schlag_off * defSchlag + 10 + 10*mauer), 1) ** 1.2;
+                loss_def_schwert += Math.round(defSchwert * proportion_schlag_off * rate_loss_def);
+                loss_def_bogen += Math.round(defBogen * proportion_schlag_off * rate_loss_def);
+                loss_def_hoplit += Math.round(defHopliten * proportion_schlag_off * rate_loss_def);
+                loss_off_reiter = Math.round(attReiter * rate_loss_off);
+            }
+            if (attStich > 0) {
+                const rate_loss_off = Math.min((proportion_stich_off * defStich + 10 + 10*mauer) / attStich, 1) ** 1.2;
+                const rate_loss_def = Math.min(attStich / (proportion_stich_off * defStich + 10 + 10*mauer), 1) ** 1.2;
+                loss_def_schwert += Math.round(defSchwert * proportion_stich_off * rate_loss_def);
+                loss_def_bogen += Math.round(defBogen * proportion_stich_off * rate_loss_def);
+                loss_def_hoplit += Math.round(defHopliten * proportion_stich_off * rate_loss_def);
+                loss_off_hopliten = Math.round(attHopliten * rate_loss_off);
+                loss_off_streitwagen = Math.round(attStreitwagen * rate_loss_off);
+            }
+            if (attFern > 0) {
+                const rate_loss_off = Math.min((proportion_fern_off * defFern + 10 + 10*mauer) / attFern, 1) ** 1.2;
+                const rate_loss_def = Math.min(attFern / (proportion_fern_off * defFern + 10 + 10*mauer), 1) ** 1.2;
+                loss_def_schwert += Math.round(defSchwert * proportion_fern_off * rate_loss_def);
+                loss_def_bogen += Math.round(defBogen * proportion_fern_off * rate_loss_def);
+                loss_def_hoplit += Math.round(defHopliten * proportion_fern_off * rate_loss_def);
+                loss_off_schleuderer = Math.round(attSchleuderer * rate_loss_off);
+            }
+                // -------------
+                ret = {
+                "loss_def_schwert": loss_def_schwert,
+                "loss_def_bogen": loss_def_bogen,
+                "loss_def_hoplit": loss_def_hoplit,
+                "loss_off_reiter": loss_off_reiter,
+                "loss_off_hopliten": loss_off_hopliten,
+                "loss_off_streitwagen": loss_off_streitwagen,
+                "loss_off_schleuderer": loss_off_schleuderer
+                };
+                return ret;
+            }
         //end helper functions
 
         // Zeit bei Kaserne 15
@@ -269,41 +318,16 @@
             benoetigteHopliten = Math.ceil(defStich/units.hopliten_att.attack.value);
             benoetigteStreitwagen = Math.ceil(defStich/units.streitwagen.attack.value);
             benoetigteReiter = Math.ceil(defSchlag/units.reiter.attack.value);
-            benoetigteSchleuderer = Math.ceil(defFern/units.schleuderer.attack.value);
-
-            let loss_def_schwert = 0;
-            let loss_def_bogen = 0;
-            let loss_def_hoplit = 0;
-            let loss_off_reiter = 0;
-            let loss_off_hopliten = 0;
-            let loss_off_streitwagen = 0;
-            let loss_off_schleuderer = 0;
-
-            if (attSchlag > 0) {
-                const rate_loss_off = Math.min((proportion_schlag_off * defSchlag + 10 + 10*mauer) / attSchlag, 1) ** 1.2;
-                const rate_loss_def = Math.min(attSchlag / (proportion_schlag_off * defSchlag + 10 + 10*mauer), 1) ** 1.2;
-                loss_def_schwert += Math.round(defSchwert * proportion_schlag_off * rate_loss_def);
-                loss_def_bogen += Math.round(defBogen * proportion_schlag_off * rate_loss_def);
-                loss_def_hoplit += Math.round(defHopliten * proportion_schlag_off * rate_loss_def);
-                loss_off_reiter = Math.round(attReiter * rate_loss_off);
-            }
-            if (attStich > 0) {
-                const rate_loss_off = Math.min((proportion_stich_off * defStich + 10 + 10*mauer) / attStich, 1) ** 1.2;
-                const rate_loss_def = Math.min(attStich / (proportion_stich_off * defStich + 10 + 10*mauer), 1) ** 1.2;
-                loss_def_schwert += Math.round(defSchwert * proportion_stich_off * rate_loss_def);
-                loss_def_bogen += Math.round(defBogen * proportion_stich_off * rate_loss_def);
-                loss_def_hoplit += Math.round(defHopliten * proportion_stich_off * rate_loss_def);
-                loss_off_hopliten = Math.round(attHopliten * rate_loss_off);
-                loss_off_streitwagen = Math.round(attStreitwagen * rate_loss_off);
-            }
-            if (attFern > 0) {
-                const rate_loss_off = Math.min((proportion_fern_off * defFern + 10 + 10*mauer) / attFern, 1) ** 1.2;
-                const rate_loss_def = Math.min(attFern / (proportion_fern_off * defFern + 10 + 10*mauer), 1) ** 1.2;
-                loss_def_schwert += Math.round(defSchwert * proportion_fern_off * rate_loss_def);
-                loss_def_bogen += Math.round(defBogen * proportion_fern_off * rate_loss_def);
-                loss_def_hoplit += Math.round(defHopliten * proportion_fern_off * rate_loss_def);
-                loss_off_schleuderer = Math.round(attSchleuderer * rate_loss_off);
-            }
+            benoetigteSchleuderer = Math.ceil(defFern/units.schleuderer.attack.value);            
+            
+            let ret = calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert, defBogen, defHopliten, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer)
+            let loss_def_schwert = ret["loss_def_schwert"];
+            let loss_def_bogen = ret["loss_def_bogen"];
+            let loss_def_hoplit = ret["loss_def_hoplit"];
+            let loss_off_reiter = ret["loss_off_reiter"];
+            let loss_off_hopliten = ret["loss_off_hopliten"];
+            let loss_off_streitwagen = ret["loss_off_streitwagen"];
+            let loss_off_schleuderer = ret["loss_off_schleuderer"];         
 
             document.getElementById('schwertkaempfer_loss').textContent = loss_def_schwert;
             document.getElementById('def_hopliten_loss').textContent = loss_def_hoplit;
