@@ -239,11 +239,12 @@
             }
         
         function calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert,
-            defBogen, defHopliten, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer) {
+            defBogen, defHopliten, defMiliz, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer) {
             // -------------
             let loss_def_schwert = 0;
             let loss_def_bogen = 0;
             let loss_def_hoplit = 0;
+            let loss_defMiliz = 0;
             let loss_off_reiter = 0;
             let loss_off_hopliten = 0;
             let loss_off_streitwagen = 0;
@@ -255,6 +256,7 @@
                 loss_def_schwert += Math.round(defSchwert * proportion_schlag_off * rate_loss_def);
                 loss_def_bogen += Math.round(defBogen * proportion_schlag_off * rate_loss_def);
                 loss_def_hoplit += Math.round(defHopliten * proportion_schlag_off * rate_loss_def);
+                loss_defMiliz += Math.round(defMiliz * proportion_schlag_off * rate_loss_def);
                 loss_off_reiter = Math.round(attReiter * rate_loss_off);
             }
             if (attStich > 0) {
@@ -263,6 +265,7 @@
                 loss_def_schwert += Math.round(defSchwert * proportion_stich_off * rate_loss_def);
                 loss_def_bogen += Math.round(defBogen * proportion_stich_off * rate_loss_def);
                 loss_def_hoplit += Math.round(defHopliten * proportion_stich_off * rate_loss_def);
+                loss_defMiliz += Math.round(defMiliz * proportion_stich_off * rate_loss_def);
                 loss_off_hopliten = Math.round(attHopliten * rate_loss_off);
                 loss_off_streitwagen = Math.round(attStreitwagen * rate_loss_off);
             }
@@ -272,22 +275,24 @@
                 loss_def_schwert += Math.round(defSchwert * proportion_fern_off * rate_loss_def);
                 loss_def_bogen += Math.round(defBogen * proportion_fern_off * rate_loss_def);
                 loss_def_hoplit += Math.round(defHopliten * proportion_fern_off * rate_loss_def);
+                loss_defMiliz += Math.round(defMiliz * proportion_fern_off * rate_loss_def);
                 loss_off_schleuderer = Math.round(attSchleuderer * rate_loss_off);
             }
-                // -------------
-                ret = {
-                "loss_def_schwert": loss_def_schwert,
-                "loss_def_bogen": loss_def_bogen,
-                "loss_def_hoplit": loss_def_hoplit,
-                "loss_off_reiter": loss_off_reiter,
-                "loss_off_hopliten": loss_off_hopliten,
-                "loss_off_streitwagen": loss_off_streitwagen,
-                "loss_off_schleuderer": loss_off_schleuderer
-                };
-                return ret;
+            // -------------
+            ret = {
+            "loss_def_schwert": loss_def_schwert,
+            "loss_def_bogen": loss_def_bogen,
+            "loss_def_hoplit": loss_def_hoplit,
+            "loss_off_reiter": loss_off_reiter,
+            "loss_off_hopliten": loss_off_hopliten,
+            "loss_off_streitwagen": loss_off_streitwagen,
+            "loss_off_schleuderer": loss_off_schleuderer,
+            "loss_defMiliz": loss_defMiliz
+            };
+            return ret;
             }
         //end helper functions
-
+        console.log("Hello");
 
         let mauerdef = [0, 3.7, 7.5, 11.4, 15.5, 19.7, 24.1, 28.5, 33.3, 38.0, 43.0, 48.1, 53.5, 59.0, 64.7, 70.5, 76.7, 82.9, 89.5, 96.2, 103.3, 110.4,, 117.9, 125.6, 133.6, 141.9];
         function calculateLosses() {
@@ -323,25 +328,127 @@
             document.getElementById('total_def_schlag').textContent = defSchlag;
             document.getElementById('total_def_stich').textContent = defStich;
             document.getElementById('total_def_fern').textContent = defFern;
+            
+            benoetigteHopliten = Math.ceil(defStich/units.hopliten_att.attack.value);
+            benoetigteStreitwagen = Math.ceil(defStich/units.streitwagen.attack.value);
+            benoetigteReiter = Math.ceil(defSchlag/units.reiter.attack.value);
+            benoetigteSchleuderer = Math.ceil(defFern/units.schleuderer.attack.value); 
 
             const totalAtt = attFern + attStich + attSchlag || 1;
             const proportion_fern_off = attFern / totalAtt;
             const proportion_stich_off = attStich / totalAtt;
-            const proportion_schlag_off = attSchlag / totalAtt;
-
-            benoetigteHopliten = Math.ceil(defStich/units.hopliten_att.attack.value);
-            benoetigteStreitwagen = Math.ceil(defStich/units.streitwagen.attack.value);
-            benoetigteReiter = Math.ceil(defSchlag/units.reiter.attack.value);
-            benoetigteSchleuderer = Math.ceil(defFern/units.schleuderer.attack.value);            
+            const proportion_schlag_off = attSchlag / totalAtt;   
             
-            let ret = calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert, defBogen, defHopliten, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer)
+            // compute battle outcome in rounds
+            let loss_def_schwert_temp = 0;
+            let loss_def_bogen_temp = 0;
+            let loss_def_hoplit_temp = 0;
+            let loss_def_miliz_temp = 0;
+            let loss_off_reiter_temp = 0;
+            let loss_off_hopliten_temp = 0;
+            let loss_off_streitwagen_temp = 0;
+            let loss_off_schleuderer_temp = 0;
+            
+            let defSchwert_temp = defSchwert;
+            let defBogen_temp = defBogen;
+            let defHopliten_temp = defHopliten;
+            let defMiliz_temp = defMiliz;
+            let attReiter_temp = attReiter;
+            let attHopliten_temp = attHopliten;
+            let attStreitwagen_temp = attStreitwagen;
+            let attSchleuderer_temp = attSchleuderer;
+            
+            let proportion_schlag_off_temp = 0;
+            let proportion_stich_off_temp = 0;
+            let proportion_fern_off_temp = 0;
+            
+            let attSchlag_temp = 0;
+            let attStich_temp = 0;
+            let attFern_temp = 0;
+            
+            let totalAtt_temp = 0;
+            let ret = 0;
+            
+            let defSchlag_temp = 0;
+            let defStich_temp = 0
+            let defFern_temp = 0;
+            
+            /*
+            The battle is computed in rounds based on the most simple case where the attack only consists of one type.
+            If the attack consists of several types the defense is divided proportional to the ratios of the attacks.
+            For each one the outcome of the battle is computed. Afterwards surving units of both sides are added
+            and the next round starts until either the attacker or the defender runs out of units.
+            */
+            do {
+                // We start by getting the attack values of the current surviving units of this round.
+                attSchlag_temp = attReiter_temp * units.reiter.attack.value;
+                attStich_temp = attHopliten_temp * units.hopliten_att.attack.value + attStreitwagen_temp * units.streitwagen.attack.value;
+                attFern_temp = attSchleuderer_temp * units.schleuderer.attack.value;
+                
+                // Next we get the defense values for the current surviving units of this round.
+                defSchlag_temp = calculate_defSchlag(defSchwert_temp, defHopliten_temp, defBogen_temp, defMiliz_temp, mauer_factor);
+                defStich_temp = calculate_defStich(defSchwert_temp, defHopliten_temp, defBogen_temp, defMiliz_temp, mauer_factor);
+                defFern_temp = calculate_defFern(defSchwert, defHopliten, defBogen, defMiliz, mauer_factor);
+                
+                // We calculate the proportions of each attack vector to divide the battle forces.
+                totalAtt_temp = attFern_temp + attStich_temp + attSchlag_temp || 1;
+                proportion_fern_off_temp = attFern_temp / totalAtt_temp;
+                proportion_stich_off_temp = attStich_temp / totalAtt_temp;
+                proportion_schlag_off_temp = attSchlag_temp / totalAtt_temp; 
+                
+                // We use these values to compute the outcome of this battle round.
+                ret = calculate_losses(proportion_schlag_off_temp, proportion_stich_off_temp, proportion_fern_off_temp, attSchlag_temp, attStich_temp, attFern_temp, defSchlag_temp, defStich_temp, defFern_temp, defSchwert_temp, defBogen_temp, defHopliten_temp, defMiliz_temp, attReiter_temp, attHopliten_temp, attStreitwagen_temp, attSchleuderer_temp, mauer);
+                
+                // Based on the outcome we update the surviving units.
+                defSchwert_temp = defSchwert_temp - ret["loss_def_schwert"];
+                defBogen_temp = defBogen_temp - ret["loss_def_bogen"];
+                defHopliten_temp = defHopliten_temp - ret["loss_def_hoplit"];
+                defMiliz_temp = defMiliz_temp - ret["loss_defMiliz"]
+                
+                attReiter_temp = attReiter_temp - ret["loss_off_reiter"];
+                attHopliten_temp = attHopliten_temp - ret["loss_off_hopliten"];
+                attStreitwagen_temp = attStreitwagen_temp - ret["loss_off_streitwagen"];
+                attSchleuderer_temp = attSchleuderer_temp - ret["loss_off_schleuderer"]; 
+                
+                // We also update total loss of troops durinh the complete battle
+                loss_def_schwert_temp = defSchwert - defSchwert_temp;
+                loss_def_bogen_temp = defBogen - defBogen_temp;
+                loss_def_hoplit_temp = defHopliten - defHopliten_temp;
+                loss_def_miliz_temp = defMiliz - defMiliz_temp;
+                
+                loss_off_reiter_temp = attReiter - attReiter_temp;
+                loss_off_hopliten_temp = attHopliten - attHopliten_temp;
+                loss_off_streitwagen_temp = attStreitwagen - attStreitwagen_temp;
+                loss_off_schleuderer_temp = attSchleuderer - attSchleuderer_temp;
+                
+                // test if one of the two sides lost
+                defense_lost = (loss_def_schwert_temp >= defSchwert && loss_def_bogen_temp >= defBogen && loss_def_hoplit_temp >= defHopliten && loss_def_miliz_temp >= defMiliz);
+                attacker_lost = (loss_off_reiter_temp >= attReiter && loss_off_hopliten_temp >= attHopliten && loss_off_streitwagen_temp >= attStreitwagen && attSchleuderer >= loss_off_schleuderer_temp);
+            } while ( !defense_lost && !attacker_lost);
+            
+            // end of battle computation
+            // update variables
+            let loss_def_schwert = loss_def_schwert_temp;
+            let loss_def_bogen = loss_def_bogen_temp;
+            let loss_def_hoplit = loss_def_hoplit_temp;
+            let loss_def_miliz = loss_def_miliz_temp;
+            let loss_off_reiter = loss_off_reiter_temp;
+            let loss_off_hopliten = loss_off_hopliten_temp;
+            let loss_off_streitwagen = loss_off_streitwagen_temp;
+            let loss_off_schleuderer = loss_off_schleuderer_temp;
+            // end
+            
+            // old code
+            /*
+            ret = calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert, defBogen, defHopliten, defMiliz, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer);
             let loss_def_schwert = ret["loss_def_schwert"];
             let loss_def_bogen = ret["loss_def_bogen"];
             let loss_def_hoplit = ret["loss_def_hoplit"];
             let loss_off_reiter = ret["loss_off_reiter"];
             let loss_off_hopliten = ret["loss_off_hopliten"];
             let loss_off_streitwagen = ret["loss_off_streitwagen"];
-            let loss_off_schleuderer = ret["loss_off_schleuderer"];         
+            let loss_off_schleuderer = ret["loss_off_schleuderer"];
+            */
 
             document.getElementById('schwertkaempfer_loss').textContent = loss_def_schwert;
             document.getElementById('def_hopliten_loss').textContent = loss_def_hoplit;
