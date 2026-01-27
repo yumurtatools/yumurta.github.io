@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defense Allocation Optimizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-blue-400">Defense Allocation Optimizer</h1>
+            <p class="text-gray-400 mt-2">Minimize resource loss while ensuring victory.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-red-900/30">
+                <h2 class="text-xl font-semibold mb-4 text-red-400 border-b border-red-900/50 pb-2">Attacker Units</h2>
+                <div class="space-y-4">
+                    <div><label class="block text-sm">Reiter</label><input type="number" id="n_reiter" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-red-500 outline-none"></div>
+                    <div><label class="block text-sm">Hopliten</label><input type="number" id="n_hopliten_atk" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-red-500 outline-none"></div>
+                    <div><label class="block text-sm">Streitwagen</label><input type="number" id="n_streitwagen" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-red-500 outline-none"></div>
+                    <div><label class="block text-sm">Schleuderer</label><input type="number" id="n_schleuderer" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-red-500 outline-none"></div>
+                    <div><label class="block text-sm font-bold mt-4">Attack Bonus (%)</label><input type="number" id="atk_bonus" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none"></div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-blue-900/30">
+                <h2 class="text-xl font-semibold mb-4 text-blue-400 border-b border-blue-900/50 pb-2">Available Defense</h2>
+                <div class="space-y-4">
+                    <div><label class="block text-sm">Schwertkämpfer</label><input type="number" id="n_swords" value="100" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none"></div>
+                    <div><label class="block text-sm">Hopliten</label><input type="number" id="n_hoplits_def" value="100" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none"></div>
+                    <div><label class="block text-sm">Bogenschützen</label><input type="number" id="n_archers" value="100" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none"></div>
+                    <div><label class="block text-sm">Militia (Free)</label><input type="number" id="n_militia" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none"></div>
+                    <div class="pt-4">
+                        <label class="block text-sm font-bold">Defense Bonus (%)</label><input type="number" id="def_bonus" value="0" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none">
+                        <label class="block text-sm font-bold mt-4">Wall Level (0-25)</label><input type="number" id="wall_lvl" value="0" min="0" max="25" class="w-full bg-gray-700 rounded p-2 border border-gray-600 focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border border-green-900/30 flex flex-col">
+                <h2 class="text-xl font-semibold mb-4 text-green-400 border-b border-green-900/50 pb-2">Optimal Strategy</h2>
+                <button onclick="optimize()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition duration-200 mb-6">
+                    CALCULATE
+                </button>
+                
+                <div id="results" class="hidden space-y-4">
+                    <div class="p-3 bg-gray-900 rounded border border-gray-700">
+                        <p class="text-xs text-gray-400 uppercase">Keep in Town</p>
+                        <div class="flex justify-between mt-1"><span>Swords:</span> <span id="res_swords" class="font-mono text-green-400 font-bold">0</span></div>
+                        <div class="flex justify-between mt-1"><span>Hoplites:</span> <span id="res_hoplits" class="font-mono text-green-400 font-bold">0</span></div>
+                        <div class="flex justify-between mt-1"><span>Archers:</span> <span id="res_archers" class="font-mono text-green-400 font-bold">0</span></div>
+                    </div>
+                    <div id="status_msg" class="text-sm p-2 text-center rounded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defense_units = {
+            "sw": { def: { schlag: 14, stich: 8, fern: 30 }, cost: 180 },
+            "ho": { def: { schlag: 18, stich: 12, fern: 7 }, cost: 225 },
+            "bo": { def: { schlag: 7, stich: 25, fern: 13 }, cost: 195 },
+            "mi": { def: { schlag: 6, stich: 8, fern: 4 }, cost: 0 }
+        };
+
+        const mauerdef = [1, 1.037, 1.075, 1.114, 1.155, 1.197, 1.241, 1.285, 1.333, 1.38, 1.43, 1.481, 1.535, 1.59, 1.647, 1.705, 1.767, 1.829, 1.895, 1.962, 2.033, 2.104, 2.179, 2.256, 2.336, 2.419];
+
+        function optimize() {
+            // Inputs
+            const n_reiter = parseInt(document.getElementById('n_reiter').value) || 0;
+            const n_hoplit_atk = parseInt(document.getElementById('n_hopliten_atk').value) || 0;
+            const n_streit = parseInt(document.getElementById('n_streitwagen').value) || 0;
+            const n_schleud = parseInt(document.getElementById('n_schleuderer').value) || 0;
+
+            const atk_bonus = (100 + (parseInt(document.getElementById('atk_bonus').value) || 0)) / 100;
+            const def_bonus = (100 + (parseInt(document.getElementById('def_bonus').value) || 0)) / 100;
+            const wall_lvl = Math.min(25, Math.max(0, parseInt(document.getElementById('wall_lvl').value) || 0));
+
+            const limit_sw = parseInt(document.getElementById('n_swords').value) || 0;
+            const limit_ho = parseInt(document.getElementById('n_hoplits_def').value) || 0;
+            const limit_bo = parseInt(document.getElementById('n_archers').value) || 0;
+            const n_militia = parseInt(document.getElementById('n_militia').value) || 0;
+
+            // Attack values
+            const A = {
+                schlag: n_reiter * 60 * atk_bonus,
+                stich: (n_hoplit_atk * 16 + n_streit * 56) * atk_bonus,
+                fern: n_schleud * 23 * atk_bonus
+            };
+            const A_total = A.schlag + A.stich + A.fern;
+            if (A_total === 0) { alert("Attacker has no units!"); return; }
+
+            const p = {
+                schlag: A.schlag / A_total,
+                stich: A.stich / A_total,
+                fern: A.fern / A_total
+            };
+
+            const costs = [defense_units.sw.cost, defense_units.ho.cost, defense_units.bo.cost];
+
+            // Objective Function (Loss * Cost)
+            function getObjective(x) {
+                let totalObj = 0;
+                ["schlag", "stich", "fern"].forEach(at => {
+                    if (p[at] > 0) {
+                        const V = (x[0] * defense_units.sw.def[at] + 
+                                   x[1] * defense_units.ho.def[at] + 
+                                   x[2] * defense_units.bo.def[at] + 
+                                   n_militia * defense_units.mi.def[at] + 
+                                   10 * (wall_lvl + 1)) * def_bonus * mauerdef[wall_lvl];
+                        const L = Math.pow(A[at] / V, 1.2);
+                        totalObj += L * (x[0] * costs[0] + x[1] * costs[1] + x[2] * costs[2]) * p[at];
+                    }
+                });
+                return totalObj;
+            }
+
+            // Constraints Check (1 - L >= 0)
+            function isFeasible(x) {
+                for (let at of ["schlag", "stich", "fern"]) {
+                    if (p[at] > 0) {
+                        const y = [x[0] * p[at], x[1] * p[at], x[2] * p[at]];
+                        const V = (y[0] * defense_units.sw.def[at] + 
+                                   y[1] * defense_units.ho.def[at] + 
+                                   y[2] * defense_units.bo.def[at] + 
+                                   (n_militia * p[at]) * defense_units.mi.def[at] + 
+                                   10 * (wall_lvl + 1)) * def_bonus * mauerdef[wall_lvl];
+                        if ((Math.pow(A[at] / V, 1.2)) > 1) return false;
+                    }
+                }
+                return true;
+            }
+
+            // Simple Hill Climbing Optimization
+            let currentX = [limit_sw, limit_ho, limit_bo];
+            let currentBest = getObjective(currentX);
+            
+            // Iterate to find minimum
+            for (let i = 0; i < 5000; i++) {
+                let nextX = currentX.map((val, idx) => {
+                    let step = (Math.random() - 0.5) * 10;
+                    let limits = [limit_sw, limit_ho, limit_bo];
+                    return Math.min(limits[idx], Math.max(0, val + step));
+                });
+
+                if (isFeasible(nextX)) {
+                    let nextObj = getObjective(nextX);
+                    if (nextObj < currentBest) {
+                        currentBest = nextObj;
+                        currentX = nextX;
+                    }
+                }
+            }
+
+            // Update UI
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('res_swords').innerText = Math.round(currentX[0]);
+            document.getElementById('res_hoplits').innerText = Math.round(currentX[1]);
+            document.getElementById('res_archers').innerText = Math.round(currentX[2]);
+            
+            const status = document.getElementById('status_msg');
+            if (isFeasible(currentX)) {
+                status.innerText = "Target Defense Met";
+                status.className = "text-sm p-2 text-center rounded bg-green-900/30 text-green-400";
+            } else {
+                status.innerText = "Insufficient forces to win";
+                status.className = "text-sm p-2 text-center rounded bg-red-900/30 text-red-400";
+            }
+        }
+    </script>
+</body>
+</html>
