@@ -141,13 +141,15 @@
             <p>Stich (total): <span id="total_att_stich">0</span></p>
             <p>Fern (total): <span id="total_att_fern">0</span></p>
         </div>
-
         <div class="section">
             <h2>Defending Forces</h2>
             <label>Anzahl Schwertkaempfer: <input type="number" id="def_schwert" min="0" value="0"></label>
             <label>Anzahl Hopliten: <input type="number" id="def_hopliten" min="0" value="0"></label>
             <label>Anzahl Bogenschuetzen: <input type="number" id="def_bogen" min="0" value="0"></label>
             <label>Anzahl Milizen: <input type="number" id="def_milizen" min="0" value="0"></label>
+            <label>Hoplitenbonus (Prozent): <input type="number" id="def_hoplitenbonus" min="0" value="0"></label>
+            <label>Schwertkaempferbonus (Prozent): <input type="number" id="def_schwertbonus" min="0" value="0"></label>
+            <label>Bogenbonus (Prozent): <input type="number" id="def_bogenbonus" min="0" value="0"></label>
             <label>Mauer: <input type="number" id="mauer" min="0" max="20" value="0"></label>
             <p>Schlag (total): <span id="total_def_schlag">0</span></p> 
 	    <p>Min. Kosten fuer Angreifer (Ressourcen): <span id="min_cost_att_schlag">0</span></p>
@@ -322,6 +324,20 @@
             units.streitwagen.attack.value = units_org.streitwagen.attack.value * att_streitwagenbonus;
             units.schleuderer.attack.value = units_org.schleuderer.attack.value * att_schleudererbonus;
             units.reiter.attack.value = units_org.reiter.attack.value * att_reiterbonus;
+            
+            const def_hoplitenbonus = 1 + parseFloat(document.getElementById('def_hoplitenbonus').value)/100;
+            const def_schwertbonus = 1 + parseFloat(document.getElementById('def_schwertbonus').value)/100;
+            const def_bogenbonus = 1 + parseFloat(document.getElementById('def_bogenbonus').value)/100;
+            
+            units.schwert.defense.schlag = units_org.schwert.defense.schlag * def_schwertbonus;
+            units.hopliten_def.defense.schlag = units_org.hopliten_def.defense.schlag * def_hoplitenbonus;
+            units.bogen.defense.schlag = units_org.bogen.defense.schlag * def_bogenbonus;
+            units.schwert.defense.stich = units_org.schwert.defense.stich * def_schwertbonus;
+            units.hopliten_def.defense.stich = units_org.hopliten_def.defense.stich * def_hoplitenbonus;
+            units.bogen.defense.stich = units_org.bogen.defense.stich * def_bogenbonus;
+            units.schwert.defense.fern = units_org.schwert.defense.fern * def_schwertbonus;
+            units.hopliten_def.defense.fern = units_org.hopliten_def.defense.fern * def_hoplitenbonus;
+            units.bogen.defense.fern = units_org.bogen.defense.fern * def_bogenbonus;
 
             const mauer_factor = 1 + mauerdef[mauer]/100;
 
@@ -455,17 +471,6 @@
             let loss_off_schleuderer = loss_off_schleuderer_temp;
             // end
             
-            // old code
-            /*
-            ret = calculate_losses(proportion_schlag_off, proportion_stich_off, proportion_fern_off, attSchlag, attStich, attFern, defSchlag, defStich, defFern, defSchwert, defBogen, defHopliten, defMiliz, attReiter, attHopliten, attStreitwagen, attSchleuderer, mauer);
-            let loss_def_schwert = ret["loss_def_schwert"];
-            let loss_def_bogen = ret["loss_def_bogen"];
-            let loss_def_hoplit = ret["loss_def_hoplit"];
-            let loss_off_reiter = ret["loss_off_reiter"];
-            let loss_off_hopliten = ret["loss_off_hopliten"];
-            let loss_off_streitwagen = ret["loss_off_streitwagen"];
-            let loss_off_schleuderer = ret["loss_off_schleuderer"];
-            */
 
             document.getElementById('schwertkaempfer_loss').textContent = loss_def_schwert;
             document.getElementById('def_hopliten_loss').textContent = loss_def_hoplit;
