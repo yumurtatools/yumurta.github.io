@@ -138,6 +138,7 @@
             <label>Schleudererbonus (Prozent): <input type="number" id="att_schleudererbonus" min="0" value="0"></label>
             <label>Reiterbonus (Prozent): <input type="number" id="att_reiterbonus" min="0" value="0"></label>
             <label>Hoplitenbonus Ressourcen (Prozent): <input type="number" id="att_hoplitenbonus_res" min="0" value="0"></label>
+            <label>Hoplitenbonus Bauzeit (Prozent): <input type="number" id="att_hoplitenbonus_bauzeit" min="0" value="0"></label>
             <p>Schlag (total): <span id="total_att_schlag">0</span></p>
             <p>Stich (total): <span id="total_att_stich">0</span></p>
             <p>Fern (total): <span id="total_att_fern">0</span></p>
@@ -322,6 +323,7 @@
             const att_reiterbonus = 1 + parseFloat(document.getElementById('att_reiterbonus').value)/100;
 
             const att_hoplitenbonus_res = 1 - parseFloat(document.getElementById('att_hoplitenbonus_res').value)/100;
+            const att_hoplitenbonus_bauzeit = 1 - parseFloat(document.getElementById('att_hoplitenbonus_bauzeit').value)/100;
             
             units.hopliten_att.attack.value = units_org.hopliten_att.attack.value * att_hoplitenbonus;
             units.streitwagen.attack.value = units_org.streitwagen.attack.value * att_streitwagenbonus;
@@ -331,6 +333,8 @@
             units.hopliten_att.cost.stein = units_org.hopliten_att.cost.stein * att_hoplitenbonus_res;
             units.hopliten_att.cost.silber = units_org.hopliten_att.cost.silber * att_hoplitenbonus_res;
             units.hopliten_att.cost.holz = units_org.hopliten_att.cost.holz * att_hoplitenbonus_res;
+
+            units.hopliten_att.cost.time = units_org.hopliten_att.cost.time * att_hoplitenbonus_bauzeit;
             
             const def_hoplitenbonus = 1 + parseFloat(document.getElementById('def_hoplitenbonus').value)/100;
             const def_schwertbonus = 1 + parseFloat(document.getElementById('def_schwertbonus').value)/100;
@@ -496,7 +500,7 @@
             const off_loss_holz = loss_off_schleuderer * units.schleuderer.cost.holz + loss_off_hopliten * units.hopliten_def.cost.holz + loss_off_reiter * units.reiter.cost.holz;
             const off_loss_silber = loss_off_schleuderer * units.schleuderer.cost.silber + loss_off_hopliten * units.hopliten_def.cost.silber + loss_off_reiter * units.reiter.cost.silber;
             const off_loss_total = off_loss_stein + off_loss_holz + off_loss_silber;
-            const off_loss_time = loss_off_schleuderer * units.schleuderer.cost.time + loss_off_hopliten * units.hopliten_def.cost.time + loss_off_reiter * units.reiter.cost.time;
+            const off_loss_time = loss_off_schleuderer * units.schleuderer.cost.time + loss_off_hopliten * units.hopliten_att.cost.time + loss_off_reiter * units.reiter.cost.time;
             
             document.getElementById('holz_def_loss').textContent = def_loss_holz;
             document.getElementById('silber_def_loss').textContent = def_loss_silber;
@@ -515,7 +519,7 @@
             document.getElementById('min_cost_att_fern').textContent = Math.round(defFern * ressourcen4fern) + " = Schleuderer "+benoetigteSchleuderer;
             
             document.getElementById('min_cost_att_schlag_time').textContent = secondsToTime(benoetigteReiter * units.reiter.cost.time);
-            document.getElementById('min_cost_att_stich_time').textContent = secondsToTime(Math.min(benoetigteHopliten * units.hopliten_def.cost.time, benoetigteStreitwagen * units.streitwagen.cost.time));
+            document.getElementById('min_cost_att_stich_time').textContent = secondsToTime(Math.min(benoetigteHopliten * units.hopliten_att.cost.time, benoetigteStreitwagen * units.streitwagen.cost.time));
             document.getElementById('min_cost_att_fern_time').textContent = secondsToTime(benoetigteSchleuderer * units.schleuderer.cost.time);
             
             const def_stein = defSchwert * units.schwert.cost.stein + defHopliten * units.hopliten_def.cost.stein + defBogen * units.bogen.cost.stein;
