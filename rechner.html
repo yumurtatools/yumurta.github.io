@@ -137,6 +137,7 @@
             <label>Streitwagenbonus (Prozent): <input type="number" id="att_streitwagenbonus" min="0" value="0"></label>
             <label>Schleudererbonus (Prozent): <input type="number" id="att_schleudererbonus" min="0" value="0"></label>
             <label>Reiterbonus (Prozent): <input type="number" id="att_reiterbonus" min="0" value="0"></label>
+            <label>Hoplitenbonus Ressourcen (Prozent): <input type="number" id="att_hoplitenbonus_res" min="0" value="0"></label>
             <p>Schlag (total): <span id="total_att_schlag">0</span></p>
             <p>Stich (total): <span id="total_att_stich">0</span></p>
             <p>Fern (total): <span id="total_att_fern">0</span></p>
@@ -319,11 +320,17 @@
             const att_streitwagenbonus = 1 + parseFloat(document.getElementById('att_streitwagenbonus').value)/100;
             const att_schleudererbonus = 1 + parseFloat(document.getElementById('att_schleudererbonus').value)/100;
             const att_reiterbonus = 1 + parseFloat(document.getElementById('att_reiterbonus').value)/100;
+
+            const att_hoplitenbonus_res = 1 - parseFloat(document.getElementById('att_hoplitenbonus_res').value)/100;
             
             units.hopliten_att.attack.value = units_org.hopliten_att.attack.value * att_hoplitenbonus;
             units.streitwagen.attack.value = units_org.streitwagen.attack.value * att_streitwagenbonus;
             units.schleuderer.attack.value = units_org.schleuderer.attack.value * att_schleudererbonus;
             units.reiter.attack.value = units_org.reiter.attack.value * att_reiterbonus;
+
+            units.hopliten_att.cost.stein = units_org.hopliten_att.cost.stein * att_hoplitenbonus_res;
+            units.hopliten_att.cost.silber = units_org.hopliten_att.cost.silber * att_hoplitenbonus_res;
+            units.hopliten_att.cost.holz = units_org.hopliten_att.cost.holz * att_hoplitenbonus_res;
             
             const def_hoplitenbonus = 1 + parseFloat(document.getElementById('def_hoplitenbonus').value)/100;
             const def_schwertbonus = 1 + parseFloat(document.getElementById('def_schwertbonus').value)/100;
