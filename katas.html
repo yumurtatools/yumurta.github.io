@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mauer-Rechner</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 { color: #2c3e50; text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #219150; }
+        
+        /* Added Warning Style */
+        #warning-box {
+            display: none;
+            background-color: #ffcccc;
+            color: #cc0000;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #cc0000;
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        .results label { color: #e67e22; }
+        .results input { background-color: #f9f9f9; border-color: #e67e22; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Katapult Rechner</h2>
+    
+    <div class="input-group">
+        <label for="mauerlevel">Mauerlevel</label>
+        <input type="number" id="mauerlevel" value="20">
+    </div>
+    <div class="input-group">
+        <label for="Schwert">Anzahl Schwertkaempfer</label>
+        <input type="number" id="Schwert" value="1000">
+    </div>
+    <div class="input-group">
+        <label for="Schleuderer">Anzahl Schleuderer</label>
+        <input type="number" id="Schleuderer" value="100">
+    </div>
+    <div class="input-group">
+        <label for="Reiter">Anzahl Reiter</label>
+        <input type="number" id="Reiter" value="0">
+    </div>
+    <div class="input-group">
+        <label for="hopliten4off">Anzahl Hopliten (Offensive)</label>
+        <input type="number" id="hopliten4off" value="0">
+    </div>
+    <div class="input-group">
+        <label for="katas">Anzahl Katapulte</label>
+        <input type="number" id="katas" value="40">
+    </div>
+
+    <button onclick="berechneZerstörung()">Berechnen</button>
+
+    <div id="warning-box">Warnung: Einer der Off/Def Ratios ≥ 1. Berechnungen sind nicht akkurat für diesen Fall.</div>
+
+    <div class="results">
+        <div class="input-group">
+            <label>Zerstörte Mauerlevel</label>
+            <input type="text" id="outGesamt" readonly>
+        </div>
+        <div class="input-group">
+            <label>Verlustquote</label>
+            <input type="text" id="outVor" readonly>
+        </div>
+        <div class="input-group">
+            <label>A/V</label>
+            <input type="text" id="outNach" readonly>
+        </div>
+        <div class="input-group">
+            <label>Mauerbonus</label>
+            <input type="text" id="outMauerbonus" readonly>
+        </div>
+        <div class="input-group">
+            <label>Effektives Mauerlevel</label>
+            <input type="text" id="outEffektMauer" readonly>
+        </div>
+        <div class="input-group">
+            <label>Effektiver Mauerbonus</label>
+            <input type="text" id="outEffektMauerbonus" readonly>
+        </div>
+        <div class="input-group">
+            <label>Zerstörte Mauerlevel</label>
+            <input type="text" id="LoW" readonly>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mauerdef = [0, 3.7, 7.5, 11.4, 15.5, 19.7, 24.1, 28.5, 33.3, 38.0, 43.0, 48.1, 53.5, 59.0, 64.7, 70.5, 76.7, 82.9, 89.5, 96.2, 103.3, 110.4, 117.9, 125.6, 133.6, 141.9];
+
+
+    function berechneZerstörung() {
+        const mauer = parseFloat(document.getElementById('mauerlevel').value) || 0;
+        const sw = parseFloat(document.getElementById('Schwert').value) || 0;
+        const schleuderer = parseFloat(document.getElementById('Schleuderer').value) || 0;
+        const reiter = parseFloat(document.getElementById('Reiter').value) || 0;
+        const katas = parseFloat(document.getElementById('katas').value) || 0;
+        const hopliten4off = parseFloat(document.getElementById('hopliten4off').value) || 0;
+
+        let off_fern = schleuderer*23 + katas*100;
+        let off_schlag = reiter*60;
+        let off_stich = hopliten4off*16;
+        let total_off = off_fern + off_schlag + off_stich;
+
+        // Prevent division by zero if no off-units are entered
+        let prop_off_fern = total_off ? off_fern / total_off : 0;
+        let prop_off_schlag = total_off ? off_schlag / total_off : 0;
+        let prop_off_stich = total_off ? off_stich / total_off : 0;
+
+        let mauer_mult = (mauerdef[mauer]/100 + 1);
+
+        // calculate effect wall bonus
+        let y = (-1 * katas/mauer  * 0.2 + 1);
+        let mauer_mult_eff = y * mauer_mult;
+        let x = mauer_mult_eff*100 - 100;
+        let eff_mauer = mauerdef.reduce((bestIndex, currentValue, currentIndex, array) => {
+           const currentDiff = Math.abs(currentValue - x);
+           const bestDiff = Math.abs(array[bestIndex] - x);
+           return currentDiff < bestDiff ? currentIndex : bestIndex;
+        }, 0);
+        // the loss of wall level is capped at 1/2 of the wall level
+        eff_mauer = Math.max(eff_mauer, Math.ceil(mauer/2));
+        mauer_mult_eff = (mauerdef[eff_mauer]/100 + 1);
+
+        let basis_def = 10*(eff_mauer+1);       
+        let def_fern = (sw*30) * mauer_mult_eff + basis_def;
+        let def_schlag = (sw*14) * mauer_mult_eff + basis_def;
+        let def_stich = (sw*8) * mauer_mult_eff + basis_def;
+
+        // Ratio calculations
+        let off_def_ratio_fern = prop_off_fern ? off_fern / (def_fern * prop_off_fern) : 0;
+        let off_def_ratio_schlag = prop_off_schlag ? off_schlag / (def_schlag * prop_off_schlag) : 0;
+        let off_def_ratio_stich = prop_off_stich ? off_stich / (def_stich * prop_off_stich) : 0;
+
+        // --- WARNING LOGIC ---
+        const warningBox = document.getElementById('warning-box');
+        if (off_def_ratio_fern >= 1 || off_def_ratio_schlag >= 1 || off_def_ratio_stich >= 1) {
+            warningBox.style.display = 'block';
+        } else {
+            warningBox.style.display = 'none';
+        }
+        // ---------------------
+
+        let total_loss_ratio = (Math.pow(off_def_ratio_fern, 1.2) * prop_off_fern) + 
+                               (Math.pow(off_def_ratio_schlag, 1.2) * prop_off_schlag) + 
+                               (Math.pow(off_def_ratio_stich, 1.2) * prop_off_stich);
+        
+        let total_loss_inv = Math.pow(total_loss_ratio, 1/1.2);
+
+        // let c = Math.exp(mauer/30 + 1/2)/katas;
+        // let c = Math.exp(mauer/30 + 1/6)/katas;
+        // let c = Math.exp(eff_mauer/30 + 1/6)/katas;
+        //let loW = total_loss_inv/c;
+        let loW = -1.3514 - 0.2244 * mauer + 0.2148 * katas + 9.9336 * total_loss_ratio;
+
+        
+        document.getElementById('outGesamt').value = loW.toFixed(2);
+        document.getElementById('outVor').value = total_loss_ratio.toFixed(4);
+        document.getElementById('outNach').value = total_loss_inv.toFixed(4);
+        document.getElementById('outMauerbonus').value = mauer_mult;
+        document.getElementById('outEffektMauerbonus').value = mauer_mult_eff;
+        document.getElementById('outEffektMauer').value = eff_mauer;
+        document.getElementById('LoW').value = loW;
+    }
+</script>
+
+</body>
+</html>
