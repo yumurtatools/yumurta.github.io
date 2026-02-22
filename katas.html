@@ -79,6 +79,14 @@
         <input type="number" id="Schwert" value="1000">
     </div>
     <div class="input-group">
+        <label for="Hoplit_def">Anzahl Hopliten</label>
+        <input type="number" id="Hoplit_def" value="1000">
+    </div>
+    <div class="input-group">
+        <label for="Bogenschuetzen">Anzahl Bogenschuetzen</label>
+        <input type="number" id="Bogenschuetzen" value="1000">
+    </div>
+    <div class="input-group">
         <label for="Schleuderer">Anzahl Schleuderer</label>
         <input type="number" id="Schleuderer" value="100">
     </div>
@@ -124,10 +132,6 @@
             <label>Effektiver Mauerbonus</label>
             <input type="text" id="outEffektMauerbonus" readonly>
         </div>
-        <div class="input-group">
-            <label>Zerstörte Mauerlevel</label>
-            <input type="text" id="LoW" readonly>
-        </div>
     </div>
 </div>
 
@@ -138,6 +142,8 @@
     function berechneZerstörung() {
         const mauer = parseFloat(document.getElementById('mauerlevel').value) || 0;
         const sw = parseFloat(document.getElementById('Schwert').value) || 0;
+        const hopliten4def = parseFloat(document.getElementById('Hoplit_def').value) || 0;
+        const bogen = parseFloat(document.getElementById('Bogenschuetzen').value) || 0;
         const schleuderer = parseFloat(document.getElementById('Schleuderer').value) || 0;
         const reiter = parseFloat(document.getElementById('Reiter').value) || 0;
         const katas = parseFloat(document.getElementById('katas').value) || 0;
@@ -169,9 +175,9 @@
         mauer_mult_eff = (mauerdef[eff_mauer]/100 + 1);
 
         let basis_def = 10*(eff_mauer+1);       
-        let def_fern = (sw*30) * mauer_mult_eff + basis_def;
-        let def_schlag = (sw*14) * mauer_mult_eff + basis_def;
-        let def_stich = (sw*8) * mauer_mult_eff + basis_def;
+        let def_fern = (sw*30 + hopliten4def*7 + bogen*13) * mauer_mult_eff + basis_def;
+        let def_schlag = (sw*14 + hopliten4def*18 + bogen*7) * mauer_mult_eff + basis_def;
+        let def_stich = (sw*8 + hopliten4def*12 + bogen*25) * mauer_mult_eff + basis_def;
 
         // Ratio calculations
         let off_def_ratio_fern = prop_off_fern ? off_fern / (def_fern * prop_off_fern) : 0;
@@ -206,7 +212,7 @@
         document.getElementById('outMauerbonus').value = mauer_mult;
         document.getElementById('outEffektMauerbonus').value = mauer_mult_eff;
         document.getElementById('outEffektMauer').value = eff_mauer;
-        document.getElementById('LoW').value = loW;
+        // document.getElementById('LoW').value = loW;
     }
 </script>
 
