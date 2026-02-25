@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defense Allocation Optimizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+
+    <div x-data="optimizer()" x-init="calculate()" class="max-w-4xl mx-auto bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+        <header class="mb-8 border-b border-gray-700 pb-4">
+            <h1 class="text-3xl font-bold text-blue-400">Defense Allocation Optimizer</h1>
+            <p class="text-gray-400 mt-2">Optimizes defense to maximize the attacker's minimum cost.</p>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <section class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Total Population (BP)</label>
+                    <input type="number" x-model.number="bp" @input="calculate()" 
+                           class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Optimization Metric (Cost)</label>
+                    <select x-model="costMetric" @change="calculate()" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="time">Time</option>
+                        <option value="cost">Resources (Wood+Stone+Silver)</option>
+                        <option value="bp">Population (BP)</option>
+                    </select>
+                </div>
+
+                <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-3">Attack Unit Values</h3>
+                    <div class="text-xs space-y-1 font-mono">
+                        <p>Stich Cost/Off: <span class="text-green-400" x-text="cost4stich.toFixed(4)"></span></p>
+                        <p>Fern Cost/Off: <span class="text-green-400" x-text="cost4fern.toFixed(4)"></span></p>
+                        <p>Schlag Cost/Off: <span class="text-green-400" x-text="cost4schlag.toFixed(4)"></span></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex flex-col justify-center bg-blue-900/20 rounded-xl p-6 border border-blue-500/30">
+                <h2 class="text-xl font-semibold mb-6 text-center text-blue-300">Recommended Allocation</h2>
+                
+                <div class="space-y-4">
+                    <template x-for="(val, unit) in results" :key="unit">
+                        <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg shadow-inner">
+                            <span class="capitalize font-medium" x-text="unit"></span>
+                            <span class="text-2xl font-bold text-white" x-text="Math.round(val)"></span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-blue-500/20">
+                    <p class="text-center text-sm text-gray-400">
+                        Objective Value: <span class="text-blue-300 font-mono" x-text="objValue.toFixed(4)"></span>
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function optimizer() {
+            return {
+                bp: 1000,
+                costMetric: 'time',
+                results: { schwert: 333, hoplit: 333, bogen: 334 },
+                objValue: 0,
+                cost4stich: 0,
+                cost4fern: 0,
+                cost4schlag: 0,
+
+                data: {
+                    def: {
+                        schwertkaempfer: { schlag: 14, stich: 8, fern: 30, cost: 180, time: 397, bp: 1 },
+                        bogen: { schlag: 7, stich: 25, fern: 13, cost: 195, time: 419, bp: 1 },
+                        hoplit: { schlag: 18, stich: 12, fern: 7, cost: 225, time: 508, bp: 1 }
+                    },
+                    off: {
+                        reiter: { off: 60, cost: 648, time: 1590, bp: 3 },
+                        hoplit: { off: 16, cost: 203, time: 508, bp: 1 },
+                        streitwagen: { off: 56, cost: 756, time: 2120, bp: 4 },
+                        schleuderer: { off: 23, cost: 176, time: 442, bp: 1 }
+                    }
+                },
+
+                calculate() {
+                    const metric = this.costMetric;
+                    
+                    // Pre-calculate Offense Costs (mimicking your script)
+                    this.cost4stich = Math.min(
+                        this.data.off.hoplit[metric] / this.data.off.hoplit.off,
+                        this.data.off.streitwagen[metric] / this.data.off.streitwagen.off
+                    );
+                    this.cost4fern = this.data.off.schleuderer[metric] / this.data.off.schleuderer.off;
+                    this.cost4schlag = this.data.off.reiter[metric] / this.data.off.reiter.off;
+
+                    // Solver: Iterative search for the best ratio
+                    // Since it's a 3-variable constrained sum, we can sample or gradient descend.
+                    // Here we use a fine-grained heuristic search for real-time responsiveness.
+                    let bestX = [this.bp/3, this.bp/3, this.bp/3];
+                    let minRatio = Infinity;
+
+                    // Search for optimal distribution
+                    for (let s = 0; s <= 100; s += 0.5) {
+                        for (let h = 0; h <= (100 - s); h += 0.5) {
+                            let b = 100 - s - h;
+                            
+                            let nS = (s/100) * this.bp;
+                            let nH = (h/100) * this.bp;
+                            let nB = (b/100) * this.bp;
+
+                            let currentRatio = this.getMinOffCost(nS, nH, nB);
+                            
+                            if (currentRatio < minRatio) {
+                                minRatio = currentRatio;
+                                bestX = [nS, nH, nB];
+                            }
+                        }
+                    }
+
+                    this.results = { schwert: bestX[0], hoplit: bestX[1], bogen: bestX[2] };
+                    this.objValue = minRatio;
+                },
+
+                getMinOffCost(nS, nH, nB) {
+                    const metric = this.costMetric;
+                    const d = this.data.def;
+
+                    let stichDef = (d.schwertkaempfer.stich * nS + d.hoplit.stich * nH + d.bogen.stich * nB) * this.cost4stich;
+                    let schlagDef = (d.schwertkaempfer.schlag * nS + d.hoplit.schlag * nH + d.bogen.schlag * nB) * this.cost4schlag;
+                    let fernDef = (d.schwertkaempfer.fern * nS + d.hoplit.fern * nH + d.bogen.fern * nB) * this.cost4fern;
+
+                    let minOffCost = Math.min(stichDef, schlagDef, fernDef);
+                    
+                    let defCost = (d.schwertkaempfer[metric] * nS) + (d.hoplit[metric] * nH) + (d.bogen[metric] * nB);
+                    
+                    return defCost / minOffCost;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
