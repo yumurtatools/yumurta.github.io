@@ -24,6 +24,13 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-medium mb-2 text-orange-400">Number of Militia</label>
+                    <input type="number" x-model.number="militia" @input="calculate()" 
+                           class="w-full bg-gray-700 border border-orange-900/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                           placeholder="e.g. 375">
+                </div>
+
+                <div>
                     <label class="block text-sm font-medium mb-2">Optimization Metric (Cost)</label>
                     <select x-model="costMetric" @change="calculate()" 
                             class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -68,8 +75,9 @@
         function optimizer() {
             return {
                 bp: 1000,
+                militia: 0, // State for militia
                 costMetric: 'time',
-                results: { schwert: 333, hoplit: 333, bogen: 334 },
+                results: { schwert: 0, hoplit: 0, bogen: 0 },
                 objValue: 0,
                 cost4stich: 0,
                 cost4fern: 0,
@@ -79,7 +87,8 @@
                     def: {
                         schwertkaempfer: { schlag: 14, stich: 8, fern: 30, cost: 180, time: 397, bp: 1 },
                         bogen: { schlag: 7, stich: 25, fern: 13, cost: 195, time: 419, bp: 1 },
-                        hoplit: { schlag: 18, stich: 12, fern: 7, cost: 225, time: 508, bp: 1 }
+                        hoplit: { schlag: 18, stich: 12, fern: 7, cost: 225, time: 508, bp: 1 },
+                        miliz: { schlag: 6, stich: 8, fern: 4, cost: 0, time: 0, bp: 0 } // Militia data
                     },
                     off: {
                         reiter: { off: 60, cost: 648, time: 1590, bp: 3 },
@@ -92,7 +101,6 @@
                 calculate() {
                     const metric = this.costMetric;
                     
-                    // Pre-calculate Offense Costs (mimicking your script)
                     this.cost4stich = Math.min(
                         this.data.off.hoplit[metric] / this.data.off.hoplit.off,
                         this.data.off.streitwagen[metric] / this.data.off.streitwagen.off
@@ -100,13 +108,9 @@
                     this.cost4fern = this.data.off.schleuderer[metric] / this.data.off.schleuderer.off;
                     this.cost4schlag = this.data.off.reiter[metric] / this.data.off.reiter.off;
 
-                    // Solver: Iterative search for the best ratio
-                    // Since it's a 3-variable constrained sum, we can sample or gradient descend.
-                    // Here we use a fine-grained heuristic search for real-time responsiveness.
                     let bestX = [this.bp/3, this.bp/3, this.bp/3];
                     let minRatio = Infinity;
 
-                    // Search for optimal distribution
                     for (let s = 0; s <= 100; s += 0.5) {
                         for (let h = 0; h <= (100 - s); h += 0.5) {
                             let b = 100 - s - h;
@@ -131,13 +135,16 @@
                 getMinOffCost(nS, nH, nB) {
                     const metric = this.costMetric;
                     const d = this.data.def;
+                    const nM = this.militia || 0;
 
-                    let stichDef = (d.schwertkaempfer.stich * nS + d.hoplit.stich * nH + d.bogen.stich * nB) * this.cost4stich;
-                    let schlagDef = (d.schwertkaempfer.schlag * nS + d.hoplit.schlag * nH + d.bogen.schlag * nB) * this.cost4schlag;
-                    let fernDef = (d.schwertkaempfer.fern * nS + d.hoplit.fern * nH + d.bogen.fern * nB) * this.cost4fern;
+                    // Calculate defense including the static militia contribution
+                    let stichDef = (d.schwertkaempfer.stich * nS + d.hoplit.stich * nH + d.bogen.stich * nB + d.miliz.stich * nM) * this.cost4stich;
+                    let schlagDef = (d.schwertkaempfer.schlag * nS + d.hoplit.schlag * nH + d.bogen.schlag * nB + d.miliz.schlag * nM) * this.cost4schlag;
+                    let fernDef = (d.schwertkaempfer.fern * nS + d.hoplit.fern * nH + d.bogen.fern * nB + d.miliz.fern * nM) * this.cost4fern;
 
                     let minOffCost = Math.min(stichDef, schlagDef, fernDef);
                     
+                    // Def cost only includes recruited units (Militia is free)
                     let defCost = (d.schwertkaempfer[metric] * nS) + (d.hoplit[metric] * nH) + (d.bogen[metric] * nB);
                     
                     return defCost / minOffCost;
