@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defense Ratio Optimizer</title>
+    <title>Defense Optimizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -31,6 +31,11 @@
                                    class="w-full bg-gray-700 border border-orange-900/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none">
                         </div>
                         <div>
+                            <label class="block text-sm font-medium mb-2 text-yellow-400">City Wall Level (0-25)</label>
+                            <input type="number" x-model.number="wallLevel" min="0" max="25" @input="calculate()" 
+                                   class="w-full bg-gray-700 border border-yellow-900/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 outline-none">
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium mb-2">Optimization Metric</label>
                             <select x-model="costMetric" @change="calculate()" 
                                     class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -51,21 +56,21 @@
                         <div class="text-xs font-bold text-red-400 uppercase text-center">Cost Red. %</div>
                         
                         <input type="number" x-model.number="bonusSchwert" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-400" placeholder="Def %">
+                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="Def %">
                         <input type="number" x-model.number="redSchwert" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Cost %">
+                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="Cost %">
                         <div class="col-span-2 text-[10px] text-gray-500 text-center -mt-3 mb-2">Schwertkämpfer</div>
 
                         <input type="number" x-model.number="bonusHoplit" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-400" placeholder="Def %">
+                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="Def %">
                         <input type="number" x-model.number="redHoplit" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Cost %">
+                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="Cost %">
                         <div class="col-span-2 text-[10px] text-gray-500 text-center -mt-3 mb-2">Hopliten</div>
 
                         <input type="number" x-model.number="bonusBogen" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-400" placeholder="Def %">
+                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="Def %">
                         <input type="number" x-model.number="redBogen" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="Cost %">
+                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="Cost %">
                         <div class="col-span-2 text-[10px] text-gray-500 text-center -mt-3">Bogenschützen</div>
                     </div>
                 </div>
@@ -74,7 +79,6 @@
             <section class="flex flex-col space-y-4">
                 <div class="bg-blue-900/20 rounded-xl p-6 border border-blue-500/30 h-full flex flex-col justify-center">
                     <h2 class="text-xl font-semibold mb-6 text-center text-blue-300">Recommended Allocation</h2>
-                    
                     <div class="space-y-4">
                         <template x-for="(val, unit) in results" :key="unit">
                             <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg shadow-inner">
@@ -83,7 +87,6 @@
                             </div>
                         </template>
                     </div>
-
                     <div class="mt-8 pt-4 border-t border-blue-500/20 text-center">
                         <p class="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Defense Cost / Attacker Cost</p>
                         <p class="text-xl font-mono text-blue-400" x-text="objValue.toFixed(4)"></p>
@@ -98,39 +101,32 @@
             return {
                 bp: 1000,
                 militia: 0,
-                bonusSchwert: 0,
-                bonusHoplit: 0,
-                bonusBogen: 0,
-                redSchwert: 0,
-                redHoplit: 0,
-                redBogen: 0,
+                wallLevel: 0,
+                bonusSchwert: 0, bonusHoplit: 0, bonusBogen: 0,
+                redSchwert: 0, redHoplit: 0, redBogen: 0,
                 costMetric: 'time',
                 results: { schwert: 0, hoplit: 0, bogen: 0 },
                 objValue: 0,
-                cost4stich: 0,
-                cost4fern: 0,
-                cost4schlag: 0,
+                // Wall bonus mapping from simulator
+                mauerdef: [0, 3.7, 7.5, 11.4, 15.5, 19.7, 24.1, 28.5, 33.3, 38.0, 43.0, 48.1, 53.5, 59.0, 64.7, 70.5, 76.7, 82.9, 89.5, 96.2, 103.3, 110.4, 117.9, 125.6, 133.6, 141.9],
 
                 data: {
                     def: {
-                      // Added bp: 1 to all units
                       schwertkaempfer: { schlag: 14, stich: 8, fern: 30, cost: 180, time: 397, bp: 1 },
                       bogen: { schlag: 7, stich: 25, fern: 13, cost: 195, time: 419, bp: 1 },
                       hoplit: { schlag: 18, stich: 12, fern: 7, cost: 225, time: 508, bp: 1 },
                       miliz: { schlag: 6, stich: 8, fern: 4, cost: 0, time: 0, bp: 0 }
-                },
-                off: {
-                      // Added bp values from your python script
+                    },
+                    off: {
                       reiter: { off: 60, cost: 648, time: 1590, bp: 3 },
                       hoplit: { off: 16, cost: 203, time: 508, bp: 1 },
                       streitwagen: { off: 56, cost: 756, time: 2120, bp: 4 },
                       schleuderer: { off: 23, cost: 176, time: 442, bp: 1 }
-                }
+                    }
                 },
 
                 calculate() {
                     const metric = this.costMetric;
-                    
                     this.cost4stich = Math.min(
                         this.data.off.hoplit[metric] / this.data.off.hoplit.off,
                         this.data.off.streitwagen[metric] / this.data.off.streitwagen.off
@@ -147,16 +143,13 @@
                             let nS = (s/100) * this.bp;
                             let nH = (h/100) * this.bp;
                             let nB = (b/100) * this.bp;
-
                             let currentRatio = this.getMinOffCost(nS, nH, nB);
-                            
                             if (currentRatio < minRatio) {
                                 minRatio = currentRatio;
                                 bestX = [nS, nH, nB];
                             }
                         }
                     }
-
                     this.results = { schwert: bestX[0], hoplit: bestX[1], bogen: bestX[2] };
                     this.objValue = minRatio;
                 },
@@ -165,27 +158,27 @@
                     const metric = this.costMetric;
                     const d = this.data.def;
                     const nM = this.militia || 0;
+                    
+                    // Wall Level logic
+                    const level = Math.max(0, Math.min(25, this.wallLevel));
+                    const wallMultiplier = 1 + (this.mauerdef[level] / 100);
+                    const wallBaseDefense = 10 * (level + 1);
 
-                    // Apply Defense Bonuses
                     const mS = 1 + (this.bonusSchwert / 100);
                     const mH = 1 + (this.bonusHoplit / 100);
                     const mB = 1 + (this.bonusBogen / 100);
 
-                    // Apply Cost Reductions (Metric is reduced, but BP is usually static)
                     const cS = metric === 'bp' ? 1 : (1 - (this.redSchwert / 100));
                     const cH = metric === 'bp' ? 1 : (1 - (this.redHoplit / 100));
                     const cB = metric === 'bp' ? 1 : (1 - (this.redBogen / 100));
 
-                    let stichDef = (d.schwertkaempfer.stich * nS * mS + d.hoplit.stich * nH * mH + d.bogen.stich * nB * mB + d.miliz.stich * nM) * this.cost4stich;
-                    let schlagDef = (d.schwertkaempfer.schlag * nS * mS + d.hoplit.schlag * nH * mH + d.bogen.schlag * nB * mB + d.miliz.schlag * nM) * this.cost4schlag;
-                    let fernDef = (d.schwertkaempfer.fern * nS * mS + d.hoplit.fern * nH * mH + d.bogen.fern * nB * mB + d.miliz.fern * nM) * this.cost4fern;
+                    // Defense calculation including wall percentage bonus and flat base defense
+                    let stichDef = ((d.schwertkaempfer.stich * nS * mS + d.hoplit.stich * nH * mH + d.bogen.stich * nB * mB + d.miliz.stich * nM) * wallMultiplier + wallBaseDefense) * this.cost4stich;
+                    let schlagDef = ((d.schwertkaempfer.schlag * nS * mS + d.hoplit.schlag * nH * mH + d.bogen.schlag * nB * mB + d.miliz.schlag * nM) * wallMultiplier + wallBaseDefense) * this.cost4schlag;
+                    let fernDef = ((d.schwertkaempfer.fern * nS * mS + d.hoplit.fern * nH * mH + d.bogen.fern * nB * mB + d.miliz.fern * nM) * wallMultiplier + wallBaseDefense) * this.cost4fern;
 
                     let minOffCost = Math.min(stichDef, schlagDef, fernDef);
-                    
-                    // The cost of the defense now accounts for reductions
-                    let defCost = (d.schwertkaempfer[metric] * nS * cS) + 
-                                  (d.hoplit[metric] * nH * cH) + 
-                                  (d.bogen[metric] * nB * cB);
+                    let defCost = (d.schwertkaempfer[metric] * nS * cS) + (d.hoplit[metric] * nH * cH) + (d.bogen[metric] * nB * cB);
                     
                     return defCost / minOffCost;
                 }
