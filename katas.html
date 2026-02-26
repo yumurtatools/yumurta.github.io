@@ -166,6 +166,16 @@ Catapults influence a battle in two distinct ways. First, they permanently destr
             <input type="text" id="outEffektMauerbonus" readonly>
         </div>
     </div>
+
+    <div class="input-group" style="background: #fdf2f2; padding: 10px; border-radius: 4px; border: 1px solid #fad2d2; margin-bottom: 15px;">
+        <label style="color: #c0392b;">Gesamtkosten bis Level <span id="selectedLevelText">20</span></label>
+        <div style="font-size: 0.85rem; color: #555; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+            <span>Holz: <b id="totalWood">0</b></span>
+            <span>Stein: <b id="totalStone">0</b></span>
+            <span>Silber: <b id="totalSilver">0</b></span>
+            <span>Bv: <b id="totalPop">0</b></span>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -177,34 +187,52 @@ const wallResources = {
   2:  { wood: 400,  stone: 700,  silver: 429,  population: 2.5 },
   3:  { wood: 400,  stone: 1050,  silver: 670,  population: 2.7 },
   4:  { wood: 400, stone: 1400, silver: 919,  population: 2.8 },
-
   5:  { wood: 400, stone: 1750, silver: 1175,  population: 2.9 },
   6:  { wood: 400, stone: 2100, silver: 1435,  population: 3.1 },
-
   7:  { wood: 400, stone: 2450, silver: 1701,  population: 3.1 },
   8:  { wood: 400, stone: 2800, silver: 1970, population: 3.2 },
-
   9:  { wood: 400, stone: 3150, silver: 2242, population: 3.3 },
   10: { wood: 400, stone: 3500, silver: 2518, population: 3.3 },
   11: { wood: 400, stone: 3850, silver: 2796, population: 3.4 },
   12: { wood: 400, stone: 4200, silver: 3077, population: 3.4 },
-
   13: { wood: 400, stone: 4550, silver: 3360, population: 3.5 },
   14: { wood: 400, stone: 4900, silver: 3646, population: 3.5 },
   15: { wood: 400, stone: 5250, silver: 3933, population: 3.6 },
   16: { wood: 400, stone: 5600, silver: 4222, population: 3.6 },
-
   17: { wood: 400, stone: 5950, silver: 4514, population: 3.6 },
   18: { wood: 400, stone: 6300, silver: 4807, population: 3.7 },
   19: { wood: 400, stone: 6650, silver: 5101, population: 3.7 },
   20: { wood: 400, stone: 7000, silver: 5397, population: 3.7 },
   21: { wood: 400, stone: 7350, silver: 5695, population: 3.7 },
-
   22: { wood: 400, stone: 7700, silver: 5994, population: 3.8 },
   23: { wood: 400, stone: 8050, silver: 6294, population: 3.8 },
   24: { wood: 400, stone: 8400, silver: 6596, population: 3.8 },
   25: { wood: 400, stone: 8750, silver: 6899, population: 3.9 }
 };
+
+    function calculateCumulativeCosts(targetLevel) {
+        let totalWood = 0;
+        let totalStone = 0;
+        let totalSilver = 0;
+        let totalPop = 0;
+    
+        // Iterate through all levels up to the target level
+        for (let i = 0; i <= targetLevel; i++) {
+            if (wallResources[i]) {
+                totalWood += wallResources[i].wood;
+                totalStone += wallResources[i].stone;
+                totalSilver += wallResources[i].silver;
+                totalPop += wallResources[i].population;
+            }
+        }
+    
+        // Update the UI
+        document.getElementById('selectedLevelText').innerText = targetLevel;
+        document.getElementById('totalWood').innerText = totalWood.toLocaleString();
+        document.getElementById('totalStone').innerText = totalStone.toLocaleString();
+        document.getElementById('totalSilver').innerText = totalSilver.toLocaleString();
+        document.getElementById('totalPop').innerText = totalPop.toFixed(1);
+    }
 
 
     function berechneZerstörung() {
@@ -281,7 +309,12 @@ const wallResources = {
         document.getElementById('outEffektMauerbonus').value = mauer_mult_eff;
         document.getElementById('outEffektMauer').value = eff_mauer;
         // document.getElementById('LoW').value = loW;
+
+
+        calculateCumulativeCosts(Math.min(mauer, 25));
     }
+
+
 </script>
 
 </body>
