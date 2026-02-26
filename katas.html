@@ -177,6 +177,18 @@ Catapults influence a battle in two distinct ways. First, they permanently destr
             <span>Bevölkerung: <b id="totalPop">0</b></span>
         </div>
     </div>
+
+
+    <div class="input-group" style="background: #fdf2f2; padding: 10px; border-radius: 4px; border: 1px solid #fad2d2; margin-bottom: 15px;">
+        <label style="color: #c0392b;">Gesamtkosten für die Katapulte</label>
+        <div style="font-size: 0.85rem; color: #555; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+            <span>Holz: <b id="totalWoodKata">0</b></span>
+            <span>Stein: <b id="totalStoneKata">0</b></span>
+            <span>Silber: <b id="totalSilverKata">0</b></span>
+            <span>Ressourcen (gesamt): <b id="totalResKata">0</b></span>
+            <span>Bevölkerung: <b id="totalPopKata">0</b></span>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -226,6 +238,8 @@ const wallResources = {
                 totalPop += wallResources[i].population;
             }
         }
+
+        const katas = parseFloat(document.getElementById('katas').value) || 0;
     
         // Update the UI
         document.getElementById('selectedLevelText').innerText = targetLevel;
@@ -234,6 +248,12 @@ const wallResources = {
         document.getElementById('totalSilver').innerText = totalSilver.toLocaleString();
         document.getElementById('totalPop').innerText = totalPop.toFixed(1);
         document.getElementById('totalResWall').innerText = totalSilver + totalWood + totalStone;
+
+        document.getElementById('totalWoodKata').innerText = 700*katas;
+        document.getElementById('totalStoneKata').innerText = 700*katas;
+        document.getElementById('totalSilverKata').innerText = 700*katas;
+        document.getElementById('totalPopKata').innerText = 15*katas;
+        document.getElementById('totalResKata').innerText = (3*700)*katas;
     }
 
 
