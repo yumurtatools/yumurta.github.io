@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Defense Optimizer</title>
+    <title>Defense Optimizer - Weighted</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -12,65 +12,79 @@
     <div x-data="optimizer()" x-init="calculate()" class="max-w-6xl mx-auto bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
         <header class="mb-8 border-b border-gray-700 pb-4 text-center">
             <h1 class="text-3xl font-bold text-blue-400">Yumurta's Defense Optimizer</h1>
-            <p class="text-gray-400 mt-2">Optimizes defense to maximize the ratio between defenders and attacker's minimum cost.</p>
+            <p class="text-gray-400 mt-2">Optimiert die Verteidigung basierend auf Kosten-Nutzen-Verhältnissen.</p>
         </header>
 
         <div class="grid lg:grid-cols-4 gap-6">
             <section class="space-y-6">
                 <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
-                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-4 text-center">General Settings</h3>
+                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-4 text-center">Allgemeine Einstellungen</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2">Total Population (BP)</label>
+                            <label class="block text-sm font-medium mb-2">Gesamtpopulation (BP)</label>
                             <input type="number" x-model.number="bp" @input="calculate()" 
                                    class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2 text-orange-400">Militia Count</label>
-                            <input type="number" x-model.number="militia" @input="calculate()" 
-                                   class="w-full bg-gray-700 border border-orange-900/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-500 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2 text-yellow-400">City Wall Level (0-25)</label>
+                            <label class="block text-sm font-medium mb-2 text-yellow-400">Stadtmauer (0-25)</label>
                             <input type="number" x-model.number="wallLevel" min="0" max="25" @input="calculate()" 
                                    class="w-full bg-gray-700 border border-yellow-900/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">Optimization Metric</label>
+                            <label class="block text-sm font-medium mb-2">Metrik</label>
                             <select x-model="costMetric" @change="calculate()" 
                                     class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                <option value="time">Time</option>
-                                <option value="cost">Resources (Wood+Stone+Silver)</option>
-                                <option value="bp">Population (BP)</option>
+                                <option value="time">Rekrutierungszeit</option>
+                                <option value="cost">Ressourcen (Holz+Stein+Silber)</option>
+                                <option value="bp">Bauernhofplätze (BP)</option>
                             </select>
                         </div>
+                        <hr class="border-gray-600">
+                        <div>
+                            <label class="block text-sm font-medium mb-2 text-purple-400">Optimierungs-Modus</label>
+                            <select x-model="optMode" @change="calculate()" 
+                                    class="w-full bg-gray-700 border border-purple-900/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 outline-none">
+                                <option value="min">Minimum (Worst Case)</option>
+                                <option value="avg">Gewichteter Durchschnitt</option>
+                            </select>
+                        </div>
+                        <template x-if="optMode === 'avg'">
+                            <div class="grid grid-cols-3 gap-2 p-2 bg-purple-900/20 rounded border border-purple-500/30">
+                                <div>
+                                    <label class="block text-[10px] text-gray-400">Stich</label>
+                                    <input type="number" x-model.number="weightStich" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-1 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-gray-400">Schlag</label>
+                                    <input type="number" x-model.number="weightSchlag" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-1 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-gray-400">Fern</label>
+                                    <input type="number" x-model.number="weightFern" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-1 py-1 text-xs">
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </div>
             </section>
 
             <section class="space-y-6">
                 <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
-                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-4 text-center text-blue-300">Defender Bonuses</h3>
+                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-4 text-center text-blue-300">Verteidiger Boni</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-[10px] font-bold text-blue-400 uppercase text-center">Def Bonus %</div>
-                        <div class="text-[10px] font-bold text-red-400 uppercase text-center">Cost Red. %</div>
+                        <div class="text-[10px] font-bold text-red-400 uppercase text-center">Kosten Red %</div>
                         
-                        <input type="number" x-model.number="bonusSchwert" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="0">
-                        <input type="number" x-model.number="redSchwert" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="0">
+                        <input type="number" x-model.number="bonusSchwert" @input="calculate()" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none">
+                        <input type="number" x-model.number="redSchwert" @input="calculate()" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none">
                         <div class="col-span-2 text-[10px] text-gray-500 text-center -mt-3 mb-2">Schwertkämpfer</div>
 
-                        <input type="number" x-model.number="bonusHoplit" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="0">
-                        <input type="number" x-model.number="redHoplit" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="0">
+                        <input type="number" x-model.number="bonusHoplit" @input="calculate()" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none">
+                        <input type="number" x-model.number="redHoplit" @input="calculate()" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none">
                         <div class="col-span-2 text-[10px] text-gray-500 text-center -mt-3 mb-2">Hopliten</div>
 
-                        <input type="number" x-model.number="bonusBogen" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="0">
-                        <input type="number" x-model.number="redBogen" @input="calculate()" 
-                               class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none" placeholder="0">
+                        <input type="number" x-model.number="bonusBogen" @input="calculate()" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none">
+                        <input type="number" x-model.number="redBogen" @input="calculate()" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm outline-none">
                         <div class="col-span-2 text-[10px] text-gray-500 text-center -mt-3">Bogenschützen</div>
                     </div>
                 </div>
@@ -78,31 +92,31 @@
 
             <section class="space-y-6">
                 <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
-                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-4 text-center text-red-400">Attacker Bonuses</h3>
+                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-4 text-center text-red-400">Angreifer Boni</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-gray-400">Stich Attack Bonus (%)</label>
-                            <input type="number" x-model.number="offBonusStich" @input="calculate()" 
-                                   class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="0">
+                            <label class="block text-xs font-medium mb-1 text-gray-400">Stich Angriff Bonus (%)</label>
+                            <input type="number" x-model.number="offBonusStich" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-gray-400">Fern Attack Bonus (%)</label>
-                            <input type="number" x-model.number="offBonusFern" @input="calculate()" 
-                                   class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="0">
+                            <label class="block text-xs font-medium mb-1 text-gray-400">Fern Angriff Bonus (%)</label>
+                            <input type="number" x-model.number="offBonusFern" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-gray-400">Schlag Attack Bonus (%)</label>
-                            <input type="number" x-model.number="offBonusSchlag" @input="calculate()" 
-                                   class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-red-400" placeholder="0">
+                            <label class="block text-xs font-medium mb-1 text-gray-400">Schlag Angriff Bonus (%)</label>
+                            <input type="number" x-model.number="offBonusSchlag" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm outline-none">
                         </div>
                     </div>
-                    <p class="text-[9px] text-gray-500 mt-4 italic text-center leading-tight">These increase the offensive power of the attacker's units, making them more cost-efficient.</p>
+                </div>
+                <div class="bg-orange-900/20 p-4 rounded-lg border border-orange-500/30">
+                    <label class="block text-sm font-medium mb-2 text-orange-400">Miliz Anzahl</label>
+                    <input type="number" x-model.number="militia" @input="calculate()" class="w-full bg-gray-700 border border-orange-900/50 rounded-lg px-4 py-2 outline-none">
                 </div>
             </section>
 
             <section class="flex flex-col space-y-4">
                 <div class="bg-blue-900/20 rounded-xl p-6 border border-blue-500/30 h-full flex flex-col justify-center">
-                    <h2 class="text-xl font-semibold mb-6 text-center text-blue-300">Recommended Allocation</h2>
+                    <h2 class="text-xl font-semibold mb-6 text-center text-blue-300">Empfohlene Aufteilung</h2>
                     <div class="space-y-4">
                         <template x-for="(val, unit) in results" :key="unit">
                             <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg shadow-inner">
@@ -112,7 +126,7 @@
                         </template>
                     </div>
                     <div class="mt-8 pt-4 border-t border-blue-500/20 text-center">
-                        <p class="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Defense Cost / Attacker Cost</p>
+                        <p class="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Def Kosten / Atk Kosten</p>
                         <p class="text-xl font-mono text-blue-400" x-text="objValue.toFixed(4)"></p>
                     </div>
                 </div>
@@ -128,8 +142,9 @@
                 wallLevel: 0,
                 bonusSchwert: 0, bonusHoplit: 0, bonusBogen: 0,
                 redSchwert: 0, redHoplit: 0, redBogen: 0,
-                // New Attacker Bonus states
                 offBonusStich: 0, offBonusFern: 0, offBonusSchlag: 0,
+                optMode: 'min',
+                weightStich: 1, weightSchlag: 1, weightFern: 1,
                 costMetric: 'time',
                 results: { schwert: 0, hoplit: 0, bogen: 0 },
                 objValue: 0,
@@ -152,9 +167,6 @@
 
                 calculate() {
                     const metric = this.costMetric;
-                    
-                    // Apply Offense Bonuses to the "Cost per Attack Point"
-                    // If a unit's attack increases by 10%, the cost per point decreases by that multiplier
                     const stichMult = 1 + (this.offBonusStich / 100);
                     const fernMult = 1 + (this.offBonusFern / 100);
                     const schlagMult = 1 + (this.offBonusSchlag / 100);
@@ -175,7 +187,7 @@
                             let nS = (s/100) * this.bp;
                             let nH = (h/100) * this.bp;
                             let nB = (b/100) * this.bp;
-                            let currentRatio = this.getMinOffCost(nS, nH, nB);
+                            let currentRatio = this.getEfficiencyRatio(nS, nH, nB);
                             if (currentRatio < minRatio) {
                                 minRatio = currentRatio;
                                 bestX = [nS, nH, nB];
@@ -186,7 +198,7 @@
                     this.objValue = minRatio;
                 },
 
-                getMinOffCost(nS, nH, nB) {
+                getEfficiencyRatio(nS, nH, nB) {
                     const metric = this.costMetric;
                     const d = this.data.def;
                     const nM = this.militia || 0;
@@ -202,14 +214,20 @@
                     const cH = metric === 'bp' ? 1 : (1 - (this.redHoplit / 100));
                     const cB = metric === 'bp' ? 1 : (1 - (this.redBogen / 100));
 
-                    let stichDef = ((d.schwertkaempfer.stich * nS * mS + d.hoplit.stich * nH * mH + d.bogen.stich * nB * mB + d.miliz.stich * nM) * wallMultiplier + wallBaseDefense) * this.cost4stich;
-                    let schlagDef = ((d.schwertkaempfer.schlag * nS * mS + d.hoplit.schlag * nH * mH + d.bogen.schlag * nB * mB + d.miliz.schlag * nM) * wallMultiplier + wallBaseDefense) * this.cost4schlag;
-                    let fernDef = ((d.schwertkaempfer.fern * nS * mS + d.hoplit.fern * nH * mH + d.bogen.fern * nB * mB + d.miliz.fern * nM) * wallMultiplier + wallBaseDefense) * this.cost4fern;
+                    let stichDef = ((d.schwertkaempfer.stich * nS * mS + d.hoplit.stich * nH * mH + d.bogen.stich * nB * mB + d.miliz.stich * nM) * wallMultiplier + wallBaseDefense);
+                    let schlagDef = ((d.schwertkaempfer.schlag * nS * mS + d.hoplit.schlag * nH * mH + d.bogen.schlag * nB * mB + d.miliz.schlag * nM) * wallMultiplier + wallBaseDefense);
+                    let fernDef = ((d.schwertkaempfer.fern * nS * mS + d.hoplit.fern * nH * mH + d.bogen.fern * nB * mB + d.miliz.fern * nM) * wallMultiplier + wallBaseDefense);
 
-                    let minOffCost = Math.min(stichDef, schlagDef, fernDef);
+                    let offValue;
+                    if (this.optMode === 'min') {
+                        offValue = Math.min(stichDef * this.cost4stich, schlagDef * this.cost4schlag, fernDef * this.cost4fern);
+                    } else {
+ 			let totalWeight = (this.weightStich + this.weightSchlag + this.weightFern)/3;
+                        offValue = Math.min(stichDef * this.cost4stich / this.weightStich * totalWeight, schlagDef * this.cost4schlag / this.weightSchlag * totalWeight, fernDef * this.cost4fern / this.weightFern * totalWeight);
+                    }
+
                     let defCost = (d.schwertkaempfer[metric] * nS * cS) + (d.hoplit[metric] * nH * cH) + (d.bogen[metric] * nB * cB);
-                    
-                    return defCost / minOffCost;
+                    return defCost / offValue;
                 }
             }
         }
