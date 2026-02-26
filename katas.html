@@ -171,6 +171,41 @@ Catapults influence a battle in two distinct ways. First, they permanently destr
 <script>
     const mauerdef = [0, 3.7, 7.5, 11.4, 15.5, 19.7, 24.1, 28.5, 33.3, 38.0, 43.0, 48.1, 53.5, 59.0, 64.7, 70.5, 76.7, 82.9, 89.5, 96.2, 103.3, 110.4, 117.9, 125.6, 133.6, 141.9];
 
+const wallResources = {
+  0:  { wood: 0,  stone: 0,  silver: 0,  population: 1 },
+  1:  { wood: 400,  stone: 350,  silver: 200,  population: 1 },
+  2:  { wood: 400,  stone: 700,  silver: 429,  population: 2.5 },
+  3:  { wood: 400,  stone: 1050,  silver: 670,  population: 2.7 },
+  4:  { wood: 400, stone: 1400, silver: 919,  population: 2.8 },
+
+  5:  { wood: 400, stone: 1750, silver: 1175,  population: 2.9 },
+  6:  { wood: 400, stone: 2100, silver: 1435,  population: 3.1 },
+
+  7:  { wood: 400, stone: 2450, silver: 1701,  population: 3.1 },
+  8:  { wood: 400, stone: 2800, silver: 1970, population: 3.2 },
+
+  9:  { wood: 400, stone: 3150, silver: 2242, population: 3.3 },
+  10: { wood: 400, stone: 3500, silver: 2518, population: 3.3 },
+  11: { wood: 400, stone: 3850, silver: 2796, population: 3.4 },
+  12: { wood: 400, stone: 4200, silver: 3077, population: 3.4 },
+
+  13: { wood: 400, stone: 4550, silver: 3360, population: 3.5 },
+  14: { wood: 400, stone: 4900, silver: 3646, population: 3.5 },
+  15: { wood: 400, stone: 5250, silver: 3933, population: 3.6 },
+  16: { wood: 400, stone: 5600, silver: 4222, population: 3.6 },
+
+  17: { wood: 400, stone: 5950, silver: 4514, population: 3.6 },
+  18: { wood: 400, stone: 6300, silver: 4807, population: 3.7 },
+  19: { wood: 400, stone: 6650, silver: 5101, population: 3.7 },
+  20: { wood: 400, stone: 7000, silver: 5397, population: 3.7 },
+  21: { wood: 400, stone: 7350, silver: 5695, population: 3.7 },
+
+  22: { wood: 400, stone: 7700, silver: 5994, population: 3.8 },
+  23: { wood: 400, stone: 8050, silver: 6294, population: 3.8 },
+  24: { wood: 400, stone: 8400, silver: 6596, population: 3.8 },
+  25: { wood: 400, stone: 8750, silver: 6899, population: 3.9 }
+};
+
 
     function berechneZerstörung() {
         const mauer = parseFloat(document.getElementById('mauerlevel').value) || 0;
