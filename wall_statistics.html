@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offense Analyzer - Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+
+    <div x-data="offenseAnalyzer()" x-init="calculate()" class="max-w-6xl mx-auto bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+        <header class="mb-8 border-b border-gray-700 pb-4 text-center">
+            <h1 class="text-3xl font-bold text-red-400">Offense Analyzer</h1>
+            <p class="text-gray-400 mt-2">Visualisierung der Angriffsverteilung (Schlag, Stich, Fern)</p>
+        </header>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <section class="space-y-6">
+                <div class="bg-gray-700/30 p-6 rounded-lg border border-gray-600">
+                    <h3 class="text-sm font-bold uppercase text-gray-400 mb-6 text-center">Einheiten-Anzahl</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-blue-300">Schleuderer (Fern)</label>
+                            <input type="number" x-model.number="units.schleuderer" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-yellow-500">Hopliten (Stich)</label>
+                            <input type="number" x-model.number="units.hopliten" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-yellow-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-red-400">Reiter (Schlag)</label>
+                            <input type="number" x-model.number="units.reiter" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-red-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-yellow-600">Streitwagen (Stich)</label>
+                            <input type="number" x-model.number="units.streitwagen" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-yellow-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-purple-400">Mantikor (Stich)</label>
+                            <input type="number" x-model.number="units.mantikor" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-purple-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1 text-pink-400">Harpien (Schlag)</label>
+                            <input type="number" x-model.number="units.harpien" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-pink-400">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-medium mb-1 text-green-400">Greife (Schlag)</label>
+                            <input type="number" x-model.number="units.greife" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-green-400">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-gray-500 border-b border-gray-700">
+                                <th class="text-left pb-2">Typ</th>
+                                <th class="text-right pb-2">Gesamtwert</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-300">
+                            <tr>
+                                <td class="py-2">Schlagangriff</td>
+                                <td class="text-right font-mono text-red-400" x-text="results.schlag.toLocaleString()"></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2">Stichangriff</td>
+                                <td class="text-right font-mono text-blue-400" x-text="results.stich.toLocaleString()"></td>
+                            </tr>
+                            <tr>
+                                <td class="py-2">Fernangriff</td>
+                                <td class="text-right font-mono text-green-400" x-text="results.fern.toLocaleString()"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="flex flex-col items-center justify-center bg-gray-700/20 rounded-xl p-6 border border-gray-700">
+                <h2 class="text-xl font-semibold mb-6 text-blue-300">Verteilung: Schlag, Stich, Fern</h2>
+                <div class="w-full max-w-md">
+                    <canvas id="offenseChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function offenseAnalyzer() {
+            return {
+                units: {
+                    schleuderer: 15981,
+                    hopliten: 3541,
+                    reiter: 2245,
+                    streitwagen: 144,
+                    mantikor: 41,
+                    harpien: 60,
+                    greife: 8
+                },
+                results: { schlag: 0, stich: 0, fern: 0 },
+                chart: null,
+
+                calculate() {
+                    // Logik aus dem Python Script
+                    this.results.schlag = (this.units.reiter * 60) + (this.units.harpien * 295) + (this.units.greife * 900);
+                    this.results.stich = (this.units.hopliten * 16) + (this.units.streitwagen * 56) + (this.units.mantikor * 1010);
+                    this.results.fern = (this.units.schleuderer * 23);
+
+                    this.updateChart();
+                },
+
+                updateChart() {
+                    const ctx = document.getElementById('offenseChart').getContext('2d');
+                    const dataValues = [this.results.schlag, this.results.stich, this.results.fern];
+                    
+                    if (this.chart) {
+                        this.chart.data.datasets[0].data = dataValues;
+                        this.chart.update();
+                    } else {
+                        this.chart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Schlag', 'Stich', 'Fern'],
+                                datasets: [{
+                                    data: dataValues,
+                                    backgroundColor: ['#ff9999', '#66b3ff', '#99ff99'],
+                                    borderColor: '#1f2937',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: { color: '#9ca3af', font: { size: 14 } }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
