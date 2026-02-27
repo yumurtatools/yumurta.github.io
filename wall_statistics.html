@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yumurta's Mauer Stats</title>
+    <title>Yumurta's Mauer Stats - Fix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,10 +11,10 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
 
-    <div x-data="offenseAnalyzer()" x-init="calculate()" class="max-w-6xl mx-auto bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+    <div x-data="offenseAnalyzer()" class="max-w-6xl mx-auto bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
         <header class="mb-8 border-b border-gray-700 pb-4 text-center">
             <h1 class="text-3xl font-bold text-red-400">Yumurta's Mauer Stats</h1>
-            <p class="text-gray-400 mt-2">Visualisierung der Truppen, die dich im bisherigen Spiel angegriffen haben.</p>
+            <p class="text-gray-400 mt-2">Ändere die Werte und klicke auf den Button.</p>
         </header>
 
         <div class="grid lg:grid-cols-2 gap-8">
@@ -24,44 +24,42 @@
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-blue-300">Schleuderer (Fern)</label>
-                            <input type="number" x-model.number="units.schleuderer" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500">
+                            <label class="block text-xs font-medium mb-1 text-blue-300">Schleuderer</label>
+                            <input type="number" x-model.number="units.schleuderer" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-blue-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-yellow-500">Hopliten (Stich)</label>
-                            <input type="number" x-model.number="units.hopliten" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-yellow-500">
+                            <label class="block text-xs font-medium mb-1 text-yellow-500">Hopliten</label>
+                            <input type="number" x-model.number="units.hopliten" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-yellow-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-red-400">Reiter (Schlag)</label>
-                            <input type="number" x-model.number="units.reiter" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-red-400">
+                            <label class="block text-xs font-medium mb-1 text-red-400">Reiter</label>
+                            <input type="number" x-model.number="units.reiter" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-red-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-yellow-600">Streitwagen (Stich)</label>
-                            <input type="number" x-model.number="units.streitwagen" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-yellow-600">
+                            <label class="block text-xs font-medium mb-1 text-yellow-600">Streitwagen</label>
+                            <input type="number" x-model.number="units.streitwagen" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-yellow-600">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-purple-400">Mantikor (Stich)</label>
-                            <input type="number" x-model.number="units.mantikor" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-purple-400">
+                            <label class="block text-xs font-medium mb-1 text-purple-400">Mantikor</label>
+                            <input type="number" x-model.number="units.mantikor" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-purple-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium mb-1 text-pink-400">Harpien (Schlag)</label>
-                            <input type="number" x-model.number="units.harpien" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-pink-400">
+                            <label class="block text-xs font-medium mb-1 text-pink-400">Harpien</label>
+                            <input type="number" x-model.number="units.harpien" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-pink-400">
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-xs font-medium mb-1 text-green-400">Greife (Schlag)</label>
-                            <input type="number" x-model.number="units.greife" @input="calculate()" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-green-400">
+                            <label class="block text-xs font-medium mb-1 text-green-400">Greife</label>
+                            <input type="number" x-model.number="units.greife" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-green-400">
                         </div>
                     </div>
+
+                    <button @click="rebuildChart()" class="w-full mt-6 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-all shadow-lg uppercase text-sm">
+                        Grafik erzwingen & aktualisieren
+                    </button>
                 </div>
 
                 <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
                     <table class="w-full text-sm">
-                        <thead>
-                            <tr class="text-gray-500 border-b border-gray-700">
-                                <th class="text-left pb-2">Typ</th>
-                                <th class="text-right pb-2">Gesamtwert</th>
-                            </tr>
-                        </thead>
                         <tbody class="text-gray-300">
                             <tr>
                                 <td class="py-2">Schlagangriff</td>
@@ -81,8 +79,7 @@
             </section>
 
             <section class="flex flex-col items-center justify-center bg-gray-700/20 rounded-xl p-6 border border-gray-700">
-                <h2 class="text-xl font-semibold mb-6 text-blue-300 text-center">Relative Verteilung</h2>
-                <div class="w-full max-w-md">
+                <div class="w-full max-w-md" id="chartContainer">
                     <canvas id="offenseChart"></canvas>
                 </div>
             </section>
@@ -90,9 +87,6 @@
     </div>
 
     <script>
-        // Plugin registrieren
-        Chart.register(ChartDataLabels);
-
         function offenseAnalyzer() {
             return {
                 units: {
@@ -105,58 +99,59 @@
                     greife: 8
                 },
                 results: { schlag: 0, stich: 0, fern: 0 },
-                chart: null,
+                myChart: null,
 
-                calculate() {
+                init() {
+                    Chart.register(ChartDataLabels);
+                    this.rebuildChart();
+                },
+
+                calculateValues() {
                     this.results.schlag = (this.units.reiter * 60) + (this.units.harpien * 295) + (this.units.greife * 900);
                     this.results.stich = (this.units.hopliten * 16) + (this.units.streitwagen * 56) + (this.units.mantikor * 1010);
                     this.results.fern = (this.units.schleuderer * 23);
-
-                    this.updateChart();
                 },
 
-                updateChart() {
+                rebuildChart() {
+                    this.calculateValues();
+
+                    // 1. Altes Chart zerstören, falls es existiert
+                    if (this.myChart) {
+                        this.myChart.destroy();
+                    }
+
+                    // 2. Canvas neu holen
                     const ctx = document.getElementById('offenseChart').getContext('2d');
-                    const dataValues = [this.results.schlag, this.results.stich, this.results.fern];
                     
-                    if (this.chart) {
-                        this.chart.data.datasets[0].data = dataValues;
-                        this.chart.update();
-                    } else {
-                        this.chart = new Chart(ctx, {
-                            type: 'pie',
-                            data: {
-                                labels: ['Schlag', 'Stich', 'Fern'],
-                                datasets: [{
-                                    data: dataValues,
-                                    backgroundColor: ['#ff9999', '#66b3ff', '#99ff99'],
-                                    borderColor: '#1f2937',
-                                    borderWidth: 2
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom',
-                                        labels: { color: '#9ca3af', font: { size: 14 } }
-                                    },
-                                    // Konfiguration der Prozentanzeige
-                                    datalabels: {
-                                        color: '#111',
-                                        font: { weight: 'bold', size: 14 },
-                                        formatter: (value, ctx) => {
-                                            let sum = 0;
-                                            let dataArr = ctx.chart.data.datasets[0].data;
-                                            dataArr.map(data => { sum += data; });
-                                            let percentage = (value * 100 / sum).toFixed(1) + "%";
-                                            return percentage;
-                                        }
+                    // 3. Chart komplett neu erstellen
+                    this.myChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Schlag', 'Stich', 'Fern'],
+                            datasets: [{
+                                data: [this.results.schlag, this.results.stich, this.results.fern],
+                                backgroundColor: ['#f87171', '#60a5fa', '#4ade80'],
+                                borderColor: '#1f2937',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            animation: { duration: 500 },
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: '#9ca3af' } },
+                                datalabels: {
+                                    color: '#000',
+                                    font: { weight: 'bold', size: 14 },
+                                    formatter: (value, context) => {
+                                        const dataset = context.chart.data.datasets[0].data;
+                                        const sum = dataset.reduce((a, b) => a + b, 0);
+                                        return sum > 0 ? (value * 100 / sum).toFixed(1) + "%" : "0%";
                                     }
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         }
