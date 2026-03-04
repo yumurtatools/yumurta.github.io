@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combat Simulator</title>
+    <title>Combat Simulator - Extended</title>
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
         h2 { margin-top: 0; color: #2c3e50; }
@@ -15,8 +15,9 @@
         button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
         button:hover { background: #2980b9; }
         .results { margin-top: 20px; padding: 15px; background: #eef2f3; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; }
     </style>
 </head>
 <body>
@@ -47,31 +48,53 @@
     <div id="output" class="results" style="display:none;">
         <h2>Ergebnisse</h2>
         <div id="losses_text"></div>
-        <h3>Ressourcen-Details</h3>
+        
+        <h3>Statistik der Verluste</h3>
         <table>
-            <tr>
-                <th>Kategorie</th>
-                <th>Wert</th>
-            </tr>
-            <tr>
-                <td>Verlorene Ressourcen (Verteidiger)</td>
-                <td id="res_lost_def">0</td>
-            </tr>
-            <tr>
-                <td>Verlorene Ressourcen (Angreifer)</td>
-                <td id="res_left_atk">0</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Kategorie</th>
+                    <th>Verteidiger (Def)</th>
+                    <th>Angreifer (Atk)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b>Verlorene Ressourcen</b></td>
+                    <td id="res_lost_def">0</td>
+                    <td id="res_lost_atk">0</td>
+                </tr>
+                <tr>
+                    <td><b>Verlorene BP (Bauernhof)</b></td>
+                    <td id="bp_lost_def">0</td>
+                    <td id="bp_lost_atk">0</td>
+                </tr>
+                <tr>
+                    <td><b>Bauzeit der Verluste</b></td>
+                    <td id="time_lost_def">0</td>
+                    <td id="time_lost_atk">0</td>
+                </tr>
+            </tbody>
         </table>
     </div>
 </div>
 
 <script>
+    // Updated units with placeholders for time (in seconds)
     const units = {
-        "biremen": { atk: 24, def: 160, res: 800+700+180, bh: 8, time: -1 },
-        "tiremen_def": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: -1 },
-        "feuerschiffe": { atk: 200, def: 60, res: 1300+300+800, bh: 10, time: -1 },
-        "tiremen_atk": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: -1 },
+        "biremen": { atk: 24, def: 160, res: 800+700+180, bh: 8, time: 2700 },
+        "tiremen_def": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: 5400 },
+        "feuerschiffe": { atk: 200, def: 60, res: 1300+300+800, bh: 10, time: 3600 },
+        "tiremen_atk": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: 5400 },
     };
+
+    function formatTime(seconds) {
+        if (seconds === 0) return "0s";
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h}h ${m}m ${s}s`;
+    }
 
     function calculateBattle() {
         // Get Inputs
@@ -87,23 +110,24 @@
         if (V === 0 && A === 0) return;
 
         // Calculate Loss Proportions
-        // Formula: (V/A)^1.2 for attacker, (A/V)^1.2 for defender
-        // We cap the loss at 1.0 (100%)
         let loss_prop_atk = Math.min(1, Math.pow(V / A, 1.2));
         let loss_prop_def = Math.min(1, Math.pow(A / V, 1.2));
 
-        // Calculate unit losses
+        // Calculate unit losses (rounded to integer)
         const lost_bir = Math.round(n_bir * loss_prop_def);
         const lost_td = Math.round(n_td * loss_prop_def);
         const lost_fs = Math.round(n_fs * loss_prop_atk);
         const lost_ta = Math.round(n_ta * loss_prop_atk);
 
-        // Resource Math
+        // --- Defender Stats ---
         const res_lost_def = (lost_bir * units.biremen.res) + (lost_td * units.tiremen_def.res);
-        
-        const total_atk_res = (n_fs * units.feuerschiffe.res) + (n_ta * units.tiremen_atk.res);
-        const lost_atk_res = (lost_fs * units.feuerschiffe.res) + (lost_ta * units.tiremen_atk.res);
-        const res_left_atk = total_atk_res - lost_atk_res;
+        const bp_lost_def = (lost_bir * units.biremen.bh) + (lost_td * units.tiremen_def.bh);
+        const time_lost_def = (lost_bir * units.biremen.time) + (lost_td * units.tiremen_def.time);
+
+        // --- Attacker Stats ---
+        const res_lost_atk = (lost_fs * units.feuerschiffe.res) + (lost_ta * units.tiremen_atk.res);
+        const bp_lost_atk = (lost_fs * units.feuerschiffe.bh) + (lost_ta * units.tiremen_atk.bh);
+        const time_lost_atk = (lost_fs * units.feuerschiffe.time) + (lost_ta * units.tiremen_atk.time);
 
         // Display
         document.getElementById('output').style.display = 'block';
@@ -111,8 +135,15 @@
             <p><b>Verteidiger Verluste:</b> ${lost_bir} Biremen, ${lost_td} Tiremen</p>
             <p><b>Angreifer Verluste:</b> ${lost_fs} Feuerschiffe, ${lost_ta} Tiremen</p>
         `;
+        
         document.getElementById('res_lost_def').innerText = res_lost_def.toLocaleString();
-        document.getElementById('res_left_atk').innerText = lost_atk_res.toLocaleString();
+        document.getElementById('res_lost_atk').innerText = res_lost_atk.toLocaleString();
+        
+        document.getElementById('bp_lost_def').innerText = bp_lost_def.toLocaleString();
+        document.getElementById('bp_lost_atk').innerText = bp_lost_atk.toLocaleString();
+        
+        document.getElementById('time_lost_def').innerText = formatTime(time_lost_def);
+        document.getElementById('time_lost_atk').innerText = formatTime(time_lost_atk);
     }
 </script>
 
