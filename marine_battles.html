@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combat Simulator - Extended</title>
+    <title>Combat Simulator - Brander Update</title>
     <style>
         body { font-family: sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
         .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -32,6 +32,8 @@
             <input type="number" id="def_biremen" value="0">
             <label>Tiremen (Verteidigung)</label>
             <input type="number" id="def_tiremen" value="0">
+            <label>Brander</label>
+            <input type="number" id="def_brander" value="0">
         </div>
 
         <div class="section">
@@ -80,16 +82,16 @@
 </div>
 
 <script>
-    // Updated units with placeholders for time (in seconds)
     const units = {
-        "biremen": { atk: 24, def: 160, res: 800+700+180, bh: 8, time: 60*60+4*60+14 },
-        "tiremen_def": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: 60*60+34*60+24 },
-        "feuerschiffe": { atk: 200, def: 60, res: 1300+300+800, bh: 10, time: 60*60+34*60+24 },
-        "tiremen_atk": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: 60*60+34*60+24 },
+        "biremen": { atk: 24, def: 160, res: 800+700+180, bh: 8, time: 3854 },
+        "tiremen_def": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: 5664 },
+        "brander": { atk: 0, def: 0, res: 500+750+150, bh: 8, time: 29*30+36 },
+        "feuerschiffe": { atk: 200, def: 60, res: 1300+300+800, bh: 10, time: 5664 },
+        "tiremen_atk": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: 5664 },
     };
 
     function formatTime(seconds) {
-        if (seconds === 0) return "0s";
+        if (seconds <= 0) return "0s";
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = seconds % 60;
@@ -97,55 +99,89 @@
     }
 
     function calculateBattle() {
-        // Get Inputs
+        // Inputs
         const n_bir = parseInt(document.getElementById('def_biremen').value) || 0;
         const n_td = parseInt(document.getElementById('def_tiremen').value) || 0;
+        const n_bra = parseInt(document.getElementById('def_brander').value) || 0;
+        
         const n_fs = parseInt(document.getElementById('atk_feuerschiffe').value) || 0;
         const n_ta = parseInt(document.getElementById('atk_tiremen').value) || 0;
 
-        // Calculate Totals
+        // Phase 1: Normal Combat
         const V = (n_bir * units.biremen.def) + (n_td * units.tiremen_def.def);
         const A = (n_fs * units.feuerschiffe.atk) + (n_ta * units.tiremen_atk.atk);
 
-        if (V === 0 && A === 0) return;
+        let lost_bir = 0, lost_td = 0, lost_fs = 0, lost_ta = 0;
 
-        // Calculate Loss Proportions
-        let loss_prop_atk = Math.min(1, Math.pow(V / A, 1.2));
-        let loss_prop_def = Math.min(1, Math.pow(A / V, 1.2));
+        if (V > 0 || A > 0) {
+            let loss_prop_atk = A > 0 ? Math.min(1, Math.pow(V / A, 1.2)) : 0;
+            let loss_prop_def = V > 0 ? Math.min(1, Math.pow(A / V, 1.2)) : 1;
 
-        // Calculate unit losses (rounded to integer)
-        const lost_bir = Math.round(n_bir * loss_prop_def);
-        const lost_td = Math.round(n_td * loss_prop_def);
-        const lost_fs = Math.round(n_fs * loss_prop_atk);
-        const lost_ta = Math.round(n_ta * loss_prop_atk);
+            lost_bir = Math.round(n_bir * loss_prop_def);
+            lost_td = Math.round(n_td * loss_prop_def);
+            lost_fs = Math.round(n_fs * loss_prop_atk);
+            lost_ta = Math.round(n_ta * loss_prop_atk);
+        }
 
-        // --- Defender Stats ---
-        const res_lost_def = (lost_bir * units.biremen.res) + (lost_td * units.tiremen_def.res);
-        const bp_lost_def = (lost_bir * units.biremen.bh) + (lost_td * units.tiremen_def.bh);
-        const time_lost_def = (lost_bir * units.biremen.time) + (lost_td * units.tiremen_def.time);
+        // Phase 2: Brander Logic
+        // Branders only act if ALL other defenders are dead
+        let lost_bra = 0;
+        let brander_kills_fs = 0;
+        let brander_kills_ta = 0;
 
-        // --- Attacker Stats ---
-        const res_lost_atk = (lost_fs * units.feuerschiffe.res) + (lost_ta * units.tiremen_atk.res);
-        const bp_lost_atk = (lost_fs * units.feuerschiffe.bh) + (lost_ta * units.tiremen_atk.bh);
-        const time_lost_atk = (lost_fs * units.feuerschiffe.time) + (lost_ta * units.tiremen_atk.time);
+        const all_def_dead = (lost_bir >= n_bir && lost_td >= n_td);
+        const attackers_remaining = (n_fs - lost_fs) + (n_ta - lost_ta);
+
+        if (all_def_dead && n_bra > 0 && attackers_remaining > 0) {
+            // How many branders can actually fight? (Limited by surviving attackers)
+            lost_bra = Math.min(n_bra, attackers_remaining);
+
+            // Calculate BP proportions of surviving attackers
+            const bp_fs = (n_fs - lost_fs) * units.feuerschiffe.bh;
+            const bp_ta = (n_ta - lost_ta) * units.tiremen_atk.bh;
+            const total_bp = bp_fs + bp_ta;
+	    const total_nA = n_fs + n_ta;
+
+            if (total_bp > 0) {
+                const pFS = n_fs / total_nA;
+                const pT = n_ta / total_nA;
+
+                brander_kills_fs = Math.round(pFS * lost_bra);
+                brander_kills_ta = Math.round(pT * lost_bra);
+                
+                // Adjust to ensure we don't kill more than exist or more than lost_bra
+                // Adding a small correction to handle rounding edge cases
+                let total_killed = brander_kills_fs + brander_kills_ta;
+                if (total_killed > lost_bra) brander_kills_fs--; 
+                
+                lost_fs += brander_kills_fs;
+                lost_ta += brander_kills_ta;
+            }
+        }
+
+        // Totals
+        const res_def = (lost_bir * units.biremen.res) + (lost_td * units.tiremen_def.res) + (lost_bra * units.brander.res);
+        const bp_def = (lost_bir * units.biremen.bh) + (lost_td * units.tiremen_def.bh) + (lost_bra * units.brander.bh);
+        const time_def = (lost_bir * units.biremen.time) + (lost_td * units.tiremen_def.time) + (lost_bra * units.brander.time);
+
+        const res_atk = (lost_fs * units.feuerschiffe.res) + (lost_ta * units.tiremen_atk.res);
+        const bp_atk = (lost_fs * units.feuerschiffe.bh) + (lost_ta * units.tiremen_atk.bh);
+        const time_atk = (lost_fs * units.feuerschiffe.time) + (lost_ta * units.tiremen_atk.time);
 
         // Display
         document.getElementById('output').style.display = 'block';
         document.getElementById('losses_text').innerHTML = `
-            <p><b>Verteidiger Verluste:</b> ${lost_bir} Biremen, ${lost_td} Tiremen</p>
-            <p><b>Angreifer Verluste:</b> ${lost_fs} Feuerschiffe, ${lost_ta} Tiremen</p>
+            <p><b>Verteidiger Verluste:</b> ${lost_bir} Bir., ${lost_td} Tir., ${lost_bra} Brander</p>
+            <p><b>Angreifer Verluste:</b> ${lost_fs} FS (davon ${brander_kills_fs} durch Brander), ${lost_ta} Tir. (davon ${brander_kills_ta} durch Brander)</p>
         `;
         
-        document.getElementById('res_lost_def').innerText = res_lost_def.toLocaleString();
-        document.getElementById('res_lost_atk').innerText = res_lost_atk.toLocaleString();
-        
-        document.getElementById('bp_lost_def').innerText = bp_lost_def.toLocaleString();
-        document.getElementById('bp_lost_atk').innerText = bp_lost_atk.toLocaleString();
-        
-        document.getElementById('time_lost_def').innerText = formatTime(time_lost_def);
-        document.getElementById('time_lost_atk').innerText = formatTime(time_lost_atk);
+        document.getElementById('res_lost_def').innerText = res_def.toLocaleString();
+        document.getElementById('res_lost_atk').innerText = res_atk.toLocaleString();
+        document.getElementById('bp_lost_def').innerText = bp_def.toLocaleString();
+        document.getElementById('bp_lost_atk').innerText = bp_atk.toLocaleString();
+        document.getElementById('time_lost_def').innerText = formatTime(time_def);
+        document.getElementById('time_lost_atk').innerText = formatTime(time_atk);
     }
 </script>
-
 </body>
 </html>
