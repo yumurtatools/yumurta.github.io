@@ -58,7 +58,7 @@
                 <td id="res_lost_def">0</td>
             </tr>
             <tr>
-                <td>Verbleibende Ressourcen (Angreifer)</td>
+                <td>Verlorene Ressourcen (Angreifer)</td>
                 <td id="res_left_atk">0</td>
             </tr>
         </table>
@@ -67,10 +67,10 @@
 
 <script>
     const units = {
-        "biremen": { atk: 10, def: 160, res: 1200, bh: 8, time: 1800 },
-        "tiremen_def": { atk: 250, def: 250, res: 2500, bh: 16, time: 3000 },
-        "feuerschiffe": { atk: 200, def: 60, res: 1500, bh: 10, time: 2200 },
-        "tiremen_atk": { atk: 250, def: 250, res: 2500, bh: 16, time: 3000 }
+        "biremen": { atk: 24, def: 160, res: 800+700+180, bh: 8, time: -1 },
+        "tiremen_def": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: -1 },
+        "feuerschiffe": { atk: 200, def: 60, res: 1300+300+800, bh: 10, time: -1 },
+        "tiremen_atk": { atk: 288, def: 288, res: 2000+1300+1300, bh: 16, time: -1 },
     };
 
     function calculateBattle() {
@@ -112,7 +112,7 @@
             <p><b>Angreifer Verluste:</b> ${lost_fs} Feuerschiffe, ${lost_ta} Tiremen</p>
         `;
         document.getElementById('res_lost_def').innerText = res_lost_def.toLocaleString();
-        document.getElementById('res_left_atk').innerText = res_left_atk.toLocaleString();
+        document.getElementById('res_left_atk').innerText = lost_atk_res.toLocaleString();
     }
 </script>
 
