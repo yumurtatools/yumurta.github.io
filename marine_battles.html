@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combat Simulator</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        h2 { margin-top: 0; color: #2c3e50; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
+        button:hover { background: #2980b9; }
+        .results { margin-top: 20px; padding: 15px; background: #eef2f3; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kampfsimulator</h1>
+    
+    <div class="grid">
+        <div class="section">
+            <h2>Verteidiger</h2>
+            <label>Biremen</label>
+            <input type="number" id="def_biremen" value="0">
+            <label>Tiremen (Verteidigung)</label>
+            <input type="number" id="def_tiremen" value="0">
+        </div>
+
+        <div class="section">
+            <h2>Angreifer</h2>
+            <label>Feuerschiffe</label>
+            <input type="number" id="atk_feuerschiffe" value="0">
+            <label>Tiremen (Angriff)</label>
+            <input type="number" id="atk_tiremen" value="0">
+        </div>
+    </div>
+
+    <button onclick="calculateBattle()">Berechnen</button>
+
+    <div id="output" class="results" style="display:none;">
+        <h2>Ergebnisse</h2>
+        <div id="losses_text"></div>
+        <h3>Ressourcen-Details</h3>
+        <table>
+            <tr>
+                <th>Kategorie</th>
+                <th>Wert</th>
+            </tr>
+            <tr>
+                <td>Verlorene Ressourcen (Verteidiger)</td>
+                <td id="res_lost_def">0</td>
+            </tr>
+            <tr>
+                <td>Verbleibende Ressourcen (Angreifer)</td>
+                <td id="res_left_atk">0</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    const units = {
+        "biremen": { atk: 10, def: 160, res: 1200, bh: 8, time: 1800 },
+        "tiremen_def": { atk: 250, def: 250, res: 2500, bh: 16, time: 3000 },
+        "feuerschiffe": { atk: 200, def: 60, res: 1500, bh: 10, time: 2200 },
+        "tiremen_atk": { atk: 250, def: 250, res: 2500, bh: 16, time: 3000 }
+    };
+
+    function calculateBattle() {
+        // Get Inputs
+        const n_bir = parseInt(document.getElementById('def_biremen').value) || 0;
+        const n_td = parseInt(document.getElementById('def_tiremen').value) || 0;
+        const n_fs = parseInt(document.getElementById('atk_feuerschiffe').value) || 0;
+        const n_ta = parseInt(document.getElementById('atk_tiremen').value) || 0;
+
+        // Calculate Totals
+        const V = (n_bir * units.biremen.def) + (n_td * units.tiremen_def.def);
+        const A = (n_fs * units.feuerschiffe.atk) + (n_ta * units.tiremen_atk.atk);
+
+        if (V === 0 && A === 0) return;
+
+        // Calculate Loss Proportions
+        // Formula: (V/A)^1.2 for attacker, (A/V)^1.2 for defender
+        // We cap the loss at 1.0 (100%)
+        let loss_prop_atk = Math.min(1, Math.pow(V / A, 1.2));
+        let loss_prop_def = Math.min(1, Math.pow(A / V, 1.2));
+
+        // Calculate unit losses
+        const lost_bir = Math.round(n_bir * loss_prop_def);
+        const lost_td = Math.round(n_td * loss_prop_def);
+        const lost_fs = Math.round(n_fs * loss_prop_atk);
+        const lost_ta = Math.round(n_ta * loss_prop_atk);
+
+        // Resource Math
+        const res_lost_def = (lost_bir * units.biremen.res) + (lost_td * units.tiremen_def.res);
+        
+        const total_atk_res = (n_fs * units.feuerschiffe.res) + (n_ta * units.tiremen_atk.res);
+        const lost_atk_res = (lost_fs * units.feuerschiffe.res) + (lost_ta * units.tiremen_atk.res);
+        const res_left_atk = total_atk_res - lost_atk_res;
+
+        // Display
+        document.getElementById('output').style.display = 'block';
+        document.getElementById('losses_text').innerHTML = `
+            <p><b>Verteidiger Verluste:</b> ${lost_bir} Biremen, ${lost_td} Tiremen</p>
+            <p><b>Angreifer Verluste:</b> ${lost_fs} Feuerschiffe, ${lost_ta} Tiremen</p>
+        `;
+        document.getElementById('res_lost_def').innerText = res_lost_def.toLocaleString();
+        document.getElementById('res_left_atk').innerText = res_left_atk.toLocaleString();
+    }
+</script>
+
+</body>
+</html>
